@@ -1,17 +1,21 @@
-editor:
-  version: VERSION
+editor_build:
+  webpack: true
   js:
-    ckeditor5-sections/build/ckeditor.js: { preprocess: false }
-    libraries/editor/editor.js: { preprocess: false }
+    libraries/editor_build/dist/index.js: { preprocess: false, source: 'libraries/editor_build/src/index.js'  }
+
+editor:
+  webpack: true
+  js:
+    libraries/editor/dist/index.js: { preprocess: false, source: 'libraries/editor/src/index.js' }
   dependencies:
     - core/jquery
     - core/drupal.ajax
     - core/drupal.dialog
     - core/jquery.once
     - core/drupal
+    - ckeditor5_sections/editor_build
 
 default-sections:
-  version: VERSION
   css:
     base:
       sections/default-sections.css: {}

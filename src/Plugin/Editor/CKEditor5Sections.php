@@ -212,7 +212,7 @@ class CKEditor5Sections extends EditorBase implements ContainerFactoryPluginInte
     $settings['templates'] = $sections;
     $settings['templateAttributes'] = $templateAttributes;
 
-    $modules = $moduleHandler->getModuleList();
+    $settings['enabled_drupal_modules'] = array_keys($moduleHandler->getModuleList());
 
     $moduleHandler->alter('ckeditor5_sections_editor_settings', $settings);
 
