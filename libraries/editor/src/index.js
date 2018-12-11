@@ -72,11 +72,11 @@ function init(element, editorSettings) {
   });
 
   return window.SectionsEditor.create(editor, {
-    rootTemplate: '_root',
+    masterTemplate: editorSettings.masterTemplate,
     templates: editorSettings.templates,
     templateAttributes: editorSettings.templateAttributes,
 
-    mediaSelector: function (type, operation, callback) {
+    drupalMediaSelector: function (type, operation, callback) {
       currentCallback = callback;
       var path = (operation === 'add') ? '/admin/content/media-widget-upload' : '/admin/content/media-widget';
 
@@ -101,11 +101,11 @@ function init(element, editorSettings) {
       }).execute();
 
     },
-    mediaRenderer: function (uuid, display, callback) {
+    drupalMediaRenderer: function (uuid, display, callback) {
       var display = display || 'default';
       $.ajax('/sections/media-preview/' + uuid + '/' + display).done(callback);
     },
-    linkSelector: function (existingValues) {
+    drupalLinkSelector: function (existingValues) {
       var dialogSettings = {
         title: existingValues ? Drupal.t('Edit link') : Drupal.t('Add link'),
         dialogClass: 'editor-link-dialog'

@@ -110,7 +110,6 @@ class CKEditor5Sections extends EditorBase implements ContainerFactoryPluginInte
   public function getDefaultSettings() {
     return [
       'rootElement' => '',
-      'defaultSection' => '',
       'enabledSections' => [],
     ];
   }
@@ -129,32 +128,6 @@ class CKEditor5Sections extends EditorBase implements ContainerFactoryPluginInte
           return $section['label'];
         }, $sections),
       '#default_value' => $settings['rootElement'],
-    ];
-
-    $form['rootElement'] = [
-      '#type' => 'select',
-      '#title' => t('Root Element'),
-      '#options' => ['default' => t('Default Root Element')] + array_map(function ($section) {
-          return $section['label'];
-        }, $sections),
-      '#default_value' => $settings['rootElement'],
-    ];
-
-    $form['defaultSection'] = [
-      '#type' => 'select',
-      '#title' => t('Default section'),
-      '#options' => array_map(function ($section) {
-        return $section['label'];
-      }, $sections),
-      '#default_value' => $settings['defaultSection'] ?: array_keys($sections)[0],
-      '#states' => [
-        'required' => [
-          'select[name*="rootElement"]' => ['value' => 'default'],
-        ],
-        'visible' => [
-          'select[name*="rootElement"]' => ['value' => 'default'],
-        ],
-      ],
     ];
 
     $form['enabledSections'] = [
@@ -192,17 +165,17 @@ class CKEditor5Sections extends EditorBase implements ContainerFactoryPluginInte
     $sections = $this->collectSections();
     $settings = $editor->getSettings();
     $enabledSections = array_filter(array_values($settings['enabledSections']));
-    $defaultSection = $settings['defaultSection'];
     $rootElement = $settings['rootElement'];
 
     if ($rootElement == 'default') {
       $sections['_root'] = [
         'label' => $this->t('Document root'),
-        'template' => '<div class="root"><div class="root-container" ck-editable-type="container" ck-allowed-elements="' . implode(' ', $enabledSections) . '" ck-default-element="' . $defaultSection . '"></div></div>',
+        'template' => '<div class="root" ck-type="container" ck-contains="' . implode(' ', $enabledSections) . '"></div>',
       ];
+      $settings['masterTemplate'] = '_root';
     }
     else {
-      $sections['_root'] = $sections[$rootElement];
+      $settings['masterTemplate'] = $rootElement;
     }
 
     /** @var \Drupal\Core\Extension\ModuleHandlerInterface $moduleHandler */
@@ -211,7 +184,6 @@ class CKEditor5Sections extends EditorBase implements ContainerFactoryPluginInte
 
     $settings['templates'] = $sections;
     $settings['templateAttributes'] = $templateAttributes;
-
     $settings['enabled_drupal_modules'] = array_keys($moduleHandler->getModuleList());
 
     $moduleHandler->alter('ckeditor5_sections_editor_settings', $settings);
@@ -225,25 +197,8 @@ class CKEditor5Sections extends EditorBase implements ContainerFactoryPluginInte
    * @return array
    */
   protected function collectSections() {
-    $path = drupal_get_path('module', 'sections') . '/sections';
-
-    $sections = [
-      'text' => [
-        'label' => $this->t('Text'),
-        'template' => file_get_contents($path . '/text.html'),
-      ],
-      'media' => [
-        'label' => $this->t('Media'),
-        'template' => file_get_contents($path . '/media.html'),
-      ],
-      'gallery' => [
-        'label' => $this->t('Gallery'),
-        'template' => file_get_contents($path . '/gallery.html'),
-      ],
-    ];
-
-    $this->moduleHandler->alter('sections', $sections);
-
+    $sections = [];
+    $this->moduleHandler->alter('ckeditor5_sections', $sections);
     return $sections;
   }
 
