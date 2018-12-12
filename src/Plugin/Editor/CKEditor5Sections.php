@@ -11,6 +11,8 @@ use Drupal\editor\Plugin\EditorBase;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\editor\Entity\Editor;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Symfony\Component\HttpFoundation\RequestStack;
+use Symfony\Component\HttpFoundation\Session\Session;
 
 // TODO: Apply linkit conditionally.
 
@@ -34,6 +36,11 @@ use Symfony\Component\DependencyInjection\ContainerInterface;
  * )
  */
 class CKEditor5Sections extends EditorBase implements ContainerFactoryPluginInterface {
+
+  /**
+   * Instance counter to track instances on a specific page request.
+   */
+  static $instances = 0;
 
   /**
    * The module handler to invoke hooks on.
@@ -81,7 +88,13 @@ class CKEditor5Sections extends EditorBase implements ContainerFactoryPluginInte
    * @param \Drupal\Core\Render\RendererInterface $renderer
    *   The renderer.
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, CKEditorPluginManager $ckeditor_plugin_manager, ModuleHandlerInterface $module_handler, LanguageManagerInterface $language_manager, RendererInterface $renderer) {
+  public function __construct(
+    array $configuration, $plugin_id, $plugin_definition,
+    CKEditorPluginManager $ckeditor_plugin_manager,
+    ModuleHandlerInterface $module_handler,
+    LanguageManagerInterface $language_manager,
+    RendererInterface $renderer
+  ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->ckeditorPluginManager = $ckeditor_plugin_manager;
     $this->moduleHandler = $module_handler;
@@ -184,6 +197,7 @@ class CKEditor5Sections extends EditorBase implements ContainerFactoryPluginInte
 
     $settings['templates'] = $sections;
     $settings['templateAttributes'] = $templateAttributes;
+    $settings['templateSession'] = implode(':', [session_id(), time(), static::$instances++ ]);
     $settings['enabled_drupal_modules'] = array_keys($moduleHandler->getModuleList());
 
     $moduleHandler->alter('ckeditor5_sections_editor_settings', $settings);

@@ -25,13 +25,13 @@ Drupal.editors.ckeditor5_sections = {
     });
   },
   detach: function (element, format, trigger) {
-    console.log('detach');
-    // if (trigger !== 'serialize') {
-    //   editors[element.id].toTextArea(element);
-    // }
+    // console.log('detach');
+    if (trigger !== 'serialize') {
+      editors[element.id].destroy();
+    }
   },
   onChange: function (element, callback) {
-    console.log('change');
+    // console.log('change');
     // editors[element.id].on('change', debounce(callback, 500));
   }
 };
@@ -75,6 +75,7 @@ function init(element, editorSettings) {
     masterTemplate: editorSettings.masterTemplate,
     templates: editorSettings.templates,
     templateAttributes: editorSettings.templateAttributes,
+    templateSession: editorSettings.templateSession,
 
     drupalMediaSelector: function (type, operation, callback) {
       currentCallback = callback;
@@ -102,8 +103,7 @@ function init(element, editorSettings) {
 
     },
     drupalMediaRenderer: function (uuid, display, callback) {
-      var display = display || 'default';
-      $.ajax('/sections/media-preview/' + uuid + '/' + display).done(callback);
+      $.ajax('/sections/media-preview/' + uuid + '/' + display || 'default' ).done(callback);
     },
     drupalLinkSelector: function (existingValues) {
       var dialogSettings = {
