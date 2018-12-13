@@ -18,6 +18,9 @@ Drupal.editors.ckeditor5_sections = {
       });
 
       $(window).on('editor:dialogsave', function (e, values) {
+        if (values.attributes.fragment && values.attributes.fragment != '_none') {
+          values.attributes.href += '#' + values.attributes.fragment;
+        }
         editor.execute( 'link', values.attributes);
       });
     }).catch(error => {
@@ -105,11 +108,14 @@ function init(element, editorSettings) {
     drupalMediaRenderer: function (uuid, display, callback) {
       $.ajax('/sections/media-preview/' + uuid + '/' + display || 'default' ).done(callback);
     },
-    drupalLinkSelector: function (existingValues) {
+    drupalLinkSelector: function (existingValues = {}) {
       var dialogSettings = {
-        title: existingValues ? Drupal.t('Edit link') : Drupal.t('Add link'),
+        title: existingValues.href ? Drupal.t('Edit link') : Drupal.t('Add link'),
         dialogClass: 'editor-link-dialog'
       };
+      if (existingValues.href) {
+        existingValues.href = existingValues.href.split('#')[0];
+      }
 
       var classes = dialogSettings.dialogClass ? dialogSettings.dialogClass.split(' ') : [];
       dialogSettings.dialogClass = classes.join(' ');

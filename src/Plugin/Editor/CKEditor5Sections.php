@@ -124,6 +124,13 @@ class CKEditor5Sections extends EditorBase implements ContainerFactoryPluginInte
     return [
       'rootElement' => '',
       'enabledSections' => [],
+      // TODO: Make this properly configurable.
+      'plugins' => [
+        'drupallink' => [
+          'linkit_enabled' => TRUE,
+          'linkit_profile' => 'default',
+        ]
+      ],
     ];
   }
 
