@@ -120,7 +120,7 @@ function init(element, editorSettings) {
         dialog: dialogSettings,
         dialogType: 'modal',
         selector: '.ckeditor-dialog-loading-link',
-        url:  Drupal.url('editor/dialog/link/sections'),
+        url:  Drupal.url('editor/dialog/link/ckeditor5_sections'),
         progress: { type: 'throbber' },
         submit: {
           editor_object: existingValues
