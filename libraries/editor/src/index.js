@@ -82,7 +82,7 @@
       templateAttributes: editorSettings.templateAttributes,
       templateSession: editorSettings.templateSession,
 
-      drupalMediaSelector: { callback: { function (type, operation, callback) {
+      drupalMediaSelector: { callback: function (type, operation, callback) {
             currentCallback = callback;
             var path = (operation === 'add') ? '/admin/content/media-widget-upload' : '/admin/content/media-widget';
 
@@ -105,11 +105,11 @@
                 title: 'Media library',
               }
             }).execute();
-          } } },
-      drupalMediaRenderer: { callback: { function (uuid, display, callback) {
+          } },
+      drupalMediaRenderer: { callback: function (uuid, display, callback) {
             $.ajax('/sections/media-preview/' + uuid + '/' + display || 'default' ).done(callback);
-          } } },
-      drupalLinkSelector: { callback: { function (existingValues = {},  callback ) {
+          } },
+      drupalLinkSelector: { callback: function (existingValues = {},  callback ) {
             currentCallback = callback;
             var dialogSettings = {
               title: existingValues.href ? Drupal.t('Edit link') : Drupal.t('Add link'),
@@ -135,7 +135,7 @@
               }
             });
             AjaxDialog.execute();
-          } } },
+          } },
     });
   }
 
