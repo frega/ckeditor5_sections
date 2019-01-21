@@ -17,9 +17,6 @@ Drupal.editors.ckeditor5_sections = {
         $(element).val(editor.getData());
       });
 
-      $(window).on('editor:dialogsave', function (e, values) {
-        editor.execute( 'link', values.attributes);
-      });
     }).catch(error => {
       console.error(error.stack);
     });
@@ -71,63 +68,74 @@ function init(element, editorSettings) {
     }
   });
 
+  $(window).on('editor:dialogsave', function (e, values) {
+    if (values.attributes.fragment && values.attributes.fragment != '_none') {
+      values.attributes.href += '#' + values.attributes.fragment;
+    }
+    currentCallback(values.attributes);
+    editors[element.id].execute( 'link', values.attributes);
+  });
+
   return window.SectionsEditor.create(editor, {
     masterTemplate: editorSettings.masterTemplate,
     templates: editorSettings.templates,
     templateAttributes: editorSettings.templateAttributes,
     templateSession: editorSettings.templateSession,
 
-    drupalMediaSelector: function (type, operation, callback) {
-      currentCallback = callback;
-      var path = (operation === 'add') ? '/admin/content/media-widget-upload' : '/admin/content/media-widget';
+    drupalMediaSelector: { callback: (type, operation, callback) => {
+          currentCallback = callback;
+          var path = (operation === 'add') ? '/admin/content/media-widget-upload' : '/admin/content/media-widget';
 
-      // Filter allowed media types.
-      var typeFilter = '';
-      if (typeof type != 'undefined') {
-        var types = type.split(' ');
-        types.forEach((item) => {
-          typeFilter += '&media_library_allowed_types[' + item + ']=' + item;
-        });
-      }
+          // Filter allowed media types.
+          var typeFilter = '';
+          if (typeof type != 'undefined') {
+            var types = type.split(' ');
+            types.forEach((item) => {
+              typeFilter += '&media_library_allowed_types[' + item + ']=' + item;
+            });
+          }
 
-      Drupal.ajax({
-        url: path + '?media_library_widget_id=' + $(element).attr('id') + typeFilter + '&media_library_remaining=1&return_type=uuid',
-        dialogType: 'modal',
-        dialog: {
-          dialogClass: 'media-library-widget-modal',
-          heigh: '75%',
-          width: '75%',
-          title: 'Media library',
-        }
-      }).execute();
+          Drupal.ajax({
+            url: path + '?media_library_widget_id=' + $(element).attr('id') + typeFilter + '&media_library_remaining=1&return_type=uuid',
+            dialogType: 'modal',
+            dialog: {
+              dialogClass: 'media-library-widget-modal',
+              heigh: '75%',
+              width: '75%',
+              title: 'Media library',
+            }
+          }).execute();
+        } },
+    drupalMediaRenderer: { callback: (uuid, display, callback) => {
+          $.ajax('/sections/media-preview/' + uuid + '/' + display || 'default' ).done(callback);
+        } },
+    drupalLinkSelector: { callback: (existingValues = {},  callback ) => {
+          currentCallback = callback;
+          var dialogSettings = {
+            title: existingValues.href ? Drupal.t('Edit link') : Drupal.t('Add link'),
+            dialogClass: 'editor-link-dialog'
+          };
+          if (existingValues.href) {
+            existingValues.href = existingValues.href.split('#')[0];
+          }
 
-    },
-    drupalMediaRenderer: function (uuid, display, callback) {
-      $.ajax('/sections/media-preview/' + uuid + '/' + display || 'default' ).done(callback);
-    },
-    drupalLinkSelector: function (existingValues) {
-      var dialogSettings = {
-        title: existingValues ? Drupal.t('Edit link') : Drupal.t('Add link'),
-        dialogClass: 'editor-link-dialog'
-      };
+          var classes = dialogSettings.dialogClass ? dialogSettings.dialogClass.split(' ') : [];
+          dialogSettings.dialogClass = classes.join(' ');
+          dialogSettings.autoResize = window.matchMedia('(min-width: 600px)').matches;
+          dialogSettings.width = 'auto';
 
-      var classes = dialogSettings.dialogClass ? dialogSettings.dialogClass.split(' ') : [];
-      dialogSettings.dialogClass = classes.join(' ');
-      dialogSettings.autoResize = window.matchMedia('(min-width: 600px)').matches;
-      dialogSettings.width = 'auto';
-
-      var AjaxDialog = Drupal.ajax({
-        dialog: dialogSettings,
-        dialogType: 'modal',
-        selector: '.ckeditor-dialog-loading-link',
-        url:  Drupal.url('editor/dialog/link/ckeditor5_sections'),
-        progress: { type: 'throbber' },
-        submit: {
-          editor_object: existingValues
-        }
-      });
-      AjaxDialog.execute();
-    },
+          var AjaxDialog = Drupal.ajax({
+            dialog: dialogSettings,
+            dialogType: 'modal',
+            selector: '.ckeditor-dialog-loading-link',
+            url:  Drupal.url('editor/dialog/link/ckeditor5_sections'),
+            progress: { type: 'throbber' },
+            submit: {
+              editor_object: existingValues
+            }
+          });
+          AjaxDialog.execute();
+        } },
   });
 }
 
