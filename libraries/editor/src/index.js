@@ -5,17 +5,17 @@
 
 (function ($, Drupal) {
 
-'use strict';
+  'use strict';
 
-var editors = {};
+  var editors = {};
 
-Drupal.editors.ckeditor5_sections = {
-  attach: function attach(element, format) {
-    init(element, format.editorSettings).then(editor => {
-      editors[element.id] = editor;
-      editor.model.document.on('change', () => {
-        $(element).val(editor.getData());
-      });
+  Drupal.editors.ckeditor5_sections = {
+    attach: function attach(element, format) {
+      init(element, format.editorSettings).then(editor => {
+        editors[element.id] = editor;
+        editor.model.document.on('change', () => {
+          $(element).val(editor.getData());
+        });
 
     }).catch(error => {
       console.error(error.stack);
@@ -33,43 +33,43 @@ Drupal.editors.ckeditor5_sections = {
   }
 };
 
-/**
- * Returns a promise to initialize an editor instance.
- *
- * @param element
- *   The target input element.
- * @param editorSettings
- *   Editor settings.
- * @returns {editor}
- */
-function init(element, editorSettings) {
-  $(element).hide();
+  /**
+   * Returns a promise to initialize an editor instance.
+   *
+   * @param element
+   *   The target input element.
+   * @param editorSettings
+   *   Editor settings.
+   * @returns {editor}
+   */
+  function init(element, editorSettings) {
+    $(element).hide();
 
-  var editor = document.createElement('div');
-  $(editor).insertAfter(element);
-  editor.innerHTML = $(element).val();
+    var editor = document.createElement('div');
+    $(editor).insertAfter(element);
+    editor.innerHTML = $(element).val();
 
-  var currentCallback = null;
+    var currentCallback = null;
 
-  var $updateButton = $('<button/>').attr('data-media-library-widget-update', $(element).attr('id'));
-  var $updateValue = $('<input/>').attr('data-media-library-widget-value', $(element).attr('id'));
+    var $updateButton = $('<button/>').attr('data-media-library-widget-update', $(element).attr('id'));
+    var $updateValue = $('<input/>').attr('data-media-library-widget-value', $(element).attr('id'));
 
-  $updateButton.insertAfter(element);
-  $updateValue.insertAfter(element);
+    $updateButton.insertAfter(element);
+    $updateValue.insertAfter(element);
 
-  $updateButton.hide();
-  $updateValue.hide();
+    $updateButton.hide();
+    $updateValue.hide();
 
-  $updateButton.mousedown(function (event) {
-    event.preventDefault();
-    if (currentCallback) {
-      currentCallback($updateValue.val());
-      currentCallback = null;
-    }
-  });
+    $updateButton.mousedown(function (event) {
+      event.preventDefault();
+      if (currentCallback) {
+        currentCallback($updateValue.val());
+        currentCallback = null;
+      }
+    });
 
   $(window).on('editor:dialogsave', function (e, values) {
-    if (values.attributes.fragment && values.attributes.fragment != '_none') {
+    if (values.attributes.fragment && values.attributes.fragment !== '_none') {
       values.attributes.href += '#' + values.attributes.fragment;
     }
     currentCallback(values.attributes);
@@ -136,7 +136,7 @@ function init(element, editorSettings) {
           });
           AjaxDialog.execute();
         } },
-  });
-}
+    });
+  }
 
 }(jQuery, Drupal));
