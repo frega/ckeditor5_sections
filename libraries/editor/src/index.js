@@ -15,6 +15,7 @@
         editors[element.id] = editor;
         editor.model.document.on('change', () => {
           $(element).val(editor.getData());
+          $(element).attr('data-editor-value-is-changed', 'true');
         });
 
     }).catch(error => {
