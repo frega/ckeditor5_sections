@@ -5,3 +5,6 @@ core: 8.x
 dependencies:
   - linkit
   - media_library
+
+ckeditor5_sections_builds:
+  - ckeditor5_sections/editor_build

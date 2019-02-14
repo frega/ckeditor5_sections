@@ -77,7 +77,9 @@
     editors[element.id].execute( 'link', values.attributes);
   });
 
-  return window.SectionsEditor.create(editor, {
+  window.ckeditor5_sections_builds = window.ckeditor5_sections_builds || {};
+
+  return window.ckeditor5_sections_builds[editorSettings.editorBuild].create(editor, {
     masterTemplate: editorSettings.masterTemplate,
     templates: editorSettings.templates,
     templateAttributes: editorSettings.templateAttributes,
