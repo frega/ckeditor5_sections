@@ -52,7 +52,10 @@ class MediaPreviewController extends ControllerBase {
    */
   function preview($uuid, $display) {
     $media = $this->entityRepository->loadEntityByUuid('media', $uuid);
-    $build = $this->entityTypeManager()->getViewBuilder('media')->view($media, $display);
+    if (!$media) {
+      return;
+    }
+    $build = $this->entityTypeManager()->getViewBuilder('media')->view($media, $display ?? 'default');
     $response = new Response();
     $response->setContent($this->renderer->render($build));
     return $response;

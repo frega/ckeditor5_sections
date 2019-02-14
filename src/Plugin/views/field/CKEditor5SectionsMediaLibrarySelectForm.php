@@ -2,10 +2,14 @@
 
 namespace Drupal\ckeditor5_sections\Plugin\views\field;
 
+use Drupal\Core\Ajax\AjaxResponse;
+use Drupal\Core\Ajax\CloseModalDialogCommand;
+use Drupal\Core\Ajax\InvokeCommand;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Form\FormBuilderInterface;
 use Drupal\Core\Url;
 use Drupal\media_library\Plugin\views\field\MediaLibrarySelectForm;
+use Symfony\Component\HttpKernel\Exception\BadRequestHttpException;
 
 /**
  * Defines a field that outputs a checkbox and form for selecting media.
@@ -39,6 +43,11 @@ class CKEditor5SectionsMediaLibrarySelectForm extends MediaLibrarySelectForm {
         '#title_display' => 'invisible',
         '#return_value' => $return_type == 'uuid' ? $entity->uuid(): $entity->id(),
       ];
+      if ($return_type == 'uuid') {
+        $form[$this->options['id']][$row_index]['#type'] = 'radio';
+        $form[$this->options['id']][$row_index]['#parents'] = [$this->options['id']];
+        $form[$this->options['id']][$row_index]['#name'] = $this->options['id'];
+      }
     }
 
     // @todo Remove in https://www.drupal.org/project/drupal/issues/2504115
@@ -62,4 +71,42 @@ class CKEditor5SectionsMediaLibrarySelectForm extends MediaLibrarySelectForm {
     unset($form['actions']['submit']);
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public static function updateWidget(array &$form, FormStateInterface $form_state) {
+    $widget_id = \Drupal::request()->query->get('media_library_widget_id');
+    $return_type = \Drupal::request()->query->get('return_type');
+    if (!$widget_id || !is_string($widget_id)) {
+      throw new BadRequestHttpException('The "media_library_widget_id" query parameter is required and must be a string.');
+    }
+    $field_id = $form_state->getTriggeringElement()['#field_id'];
+    if ($return_type == 'uuid') {
+      $selected = [$form_state->getValue($field_id, [])];
+    } else {
+      $selected = array_values(array_filter($form_state->getValue($field_id, [])));
+    }
+
+    // Pass the selection to the field widget based on the current widget ID.
+    return (new AjaxResponse())
+      ->addCommand(new InvokeCommand("[data-media-library-widget-value=\"$widget_id\"]", 'val', [implode(',', $selected)]))
+      ->addCommand(new InvokeCommand("[data-media-library-widget-update=\"$widget_id\"]", 'trigger', ['mousedown']))
+      ->addCommand(new CloseModalDialogCommand());
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function viewsFormValidate(array &$form, FormStateInterface $form_state) {
+    $return_type = \Drupal::request()->query->get('return_type');
+
+    if ($return_type == 'uuid') {
+      $selected = $form_state->getValue($this->options['id'], []);
+    } else {
+      $selected = array_filter($form_state->getValue($this->options['id']));
+    }
+    if (empty($selected)) {
+      $form_state->setErrorByName('', $this->t('No items selected.'));
+    }
+  }
 }
