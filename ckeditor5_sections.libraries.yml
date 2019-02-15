@@ -1,12 +1,10 @@
 editor_build:
-  webpack: true
   js:
-    libraries/editor_build/dist/index.js: { preprocess: false, source: 'libraries/editor_build/src/index.js'  }
+    editor/build/ckeditor.js: { preprocess: false }
 
 editor:
-  webpack: true
   js:
-    libraries/editor/dist/index.js: { preprocess: false, source: 'libraries/editor/src/index.js' }
+    ckeditor5_sections.editor.js: { preprocess: false }
   dependencies:
     - core/jquery
     - core/drupal.ajax
