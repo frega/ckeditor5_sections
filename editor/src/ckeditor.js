@@ -1,5 +1,7 @@
 // The editor creator to use.
+import Plugin from '@ckeditor/ckeditor5-core/src/plugin';
 import BalloonEditorBase from '@ckeditor/ckeditor5-editor-balloon/src/ballooneditor';
+
 import Essentials from '@ckeditor/ckeditor5-essentials/src/essentials';
 import Autoformat from '@ckeditor/ckeditor5-autoformat/src/autoformat';
 import Bold from '@ckeditor/ckeditor5-basic-styles/src/bold';
@@ -17,11 +19,26 @@ import BlockToolbar from '@ckeditor/ckeditor5-ui/src/toolbar/block/blocktoolbar'
 import Validation from '@amazee/ckeditor5-template/src/validation';
 import ButtonElement from '@amazee/ckeditor5-drupal-linkit/src/elements/buttonelement';
 import TemplateEditing from '@amazee/ckeditor5-template/src/templateediting';
+import RemoteControl from '@amazee/ckeditor5-template/src/remotecontrol';
 
-class SectionsEditor extends BalloonEditorBase {}
+import Placeholder from '@amazee/editor-components/components/placeholder/placeholder';
+import '@amazee/editor-components/components/container/container';
+import '@amazee/editor-components/components/gallery/gallery';
+
+export default class SectionsEditor extends BalloonEditorBase {}
+
+class PlaceholderConfig extends Plugin {
+	init() {
+		const templates = this.editor.config.get( 'templates' );
+		Placeholder.availableSections = Object.keys( templates )
+				.map( id => ( { id, label: templates[ id ].label, icon: templates[ id ].icon } ) );
+	}
+}
 
 // Plugins to include in the build.
 SectionsEditor.builtinPlugins = [
+	PlaceholderConfig,
+	RemoteControl,
 	Essentials,
 	Autoformat,
 	Bold,
@@ -67,7 +84,6 @@ SectionsEditor.defaultConfig = {
 	// This value must be kept in sync with the language defined in webpack.config.js.
 	language: 'en'
 };
-debugger;
 
 window.ckeditor5_sections_builds = window.ckeditor5_sections_builds || {};
 window.ckeditor5_sections_builds['ckeditor5_sections/editor_build'] = SectionsEditor;
