@@ -20,10 +20,12 @@ import Validation from '@amazee/ckeditor5-template/src/validation';
 import ButtonElement from '@amazee/ckeditor5-drupal-linkit/src/elements/buttonelement';
 import TemplateEditing from '@amazee/ckeditor5-template/src/templateediting';
 import RemoteControl from '@amazee/ckeditor5-template/src/remotecontrol';
-
+import TabsElement from '@amazee/ckeditor5-template/src/elements/tabselement'
 import Placeholder from '@amazee/editor-components/components/placeholder/placeholder';
 import '@amazee/editor-components/components/container/container';
 import '@amazee/editor-components/components/gallery/gallery';
+import '@amazee/editor-components/components/tabs/tabs';
+import GalleryElement from "@amazee/ckeditor5-template/src/elements/galleryelement";
 
 export default class SectionsEditor extends BalloonEditorBase {}
 
@@ -55,7 +57,9 @@ SectionsEditor.builtinPlugins = [
 	TemplateEditing,
 	DrupalMedia,
 	Validation,
-	ButtonElement
+	ButtonElement,
+  TabsElement,
+  GalleryElement
 ];
 
 // Editor configuration.

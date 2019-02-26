@@ -78,7 +78,6 @@
 
     window.ckeditor5_sections_builds = window.ckeditor5_sections_builds || {};
 
-    debugger;
     return window.ckeditor5_sections_builds[editorSettings.editorBuild].create(editor, {
       masterTemplate: editorSettings.masterTemplate,
       templates: editorSettings.templates,

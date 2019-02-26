@@ -2,30 +2,28 @@
 # yarn lockfile v1
 
 
-"@amazee/ckeditor5-drupal-linkit@^0.0.10":
-  version "0.0.10"
-  resolved "https://registry.yarnpkg.com/@amazee/ckeditor5-drupal-linkit/-/ckeditor5-drupal-linkit-0.0.10.tgz#0de378c776d68d45788c312e9d4ce781a71845ff"
-  integrity sha512-KoxMbrhavG7Zt2ppN6rIJU23mJ1swAZXRTW80ERw2yGol2HVdSiCbILLE8SVed954GA7pWKOVJ2hRzL+/kg5nQ==
+"@amazee/ckeditor5-drupal-linkit@0.0.13":
+  version "0.0.13"
+  resolved "https://registry.yarnpkg.com/@amazee/ckeditor5-drupal-linkit/-/ckeditor5-drupal-linkit-0.0.13.tgz#a2a71d3ae9ebb577fdd9e23058b14e1e2a914db6"
+  integrity sha512-r08WTEXUsTWJ4baD/wdwxHVLYf0oBLXQSPgmPcLaONGTqStvIOfy6RLRhPmu8JC87NL2ddHRbILEkQa0VmJOYA==
   dependencies:
-    "@amazee/ckeditor5-template" "^0.0.14"
     "@ckeditor/ckeditor5-link" "^10.1.0"
 
-"@amazee/ckeditor5-drupal-media@^0.0.16":
-  version "0.0.16"
-  resolved "https://registry.yarnpkg.com/@amazee/ckeditor5-drupal-media/-/ckeditor5-drupal-media-0.0.16.tgz#d22aa1d03bf5d830c4a98a5289d9088bb1e9da3e"
-  integrity sha512-N0tsKgWrcxxdNdRCJEd5KGhF2E41Rd4sooztLRPA7w67dqvun7H186jDqKdOj3WrXzWnUlPqlrjDDvOu8kBfsA==
+"@amazee/ckeditor5-drupal-media@0.0.19":
+  version "0.0.19"
+  resolved "https://registry.yarnpkg.com/@amazee/ckeditor5-drupal-media/-/ckeditor5-drupal-media-0.0.19.tgz#f515ba29e0ab86e5e065a4b7445f9cf59653ff80"
+  integrity sha512-KL1ciUvHl5ZAhhVU26Qi+hN/ax5U096fcSVBNWkVWkr6s4Wi/w2db6tJpkPLVp3DyJukFKT8b1DnIBtXZSYKPA==
   dependencies:
-    "@amazee/ckeditor5-template" "^0.0.14"
     "@ckeditor/ckeditor5-core" "^11.1.0"
     "@ckeditor/ckeditor5-engine" "^12.0.0"
     "@ckeditor/ckeditor5-ui" "^11.2.0"
     "@ckeditor/ckeditor5-utils" "^11.1.0"
     "@ckeditor/ckeditor5-widget" "^10.3.1"
 
-"@amazee/ckeditor5-template@^0.0.14":
-  version "0.0.14"
-  resolved "https://registry.yarnpkg.com/@amazee/ckeditor5-template/-/ckeditor5-template-0.0.14.tgz#499b7da159a32bdd57ae0de3d419a402f9f5c524"
-  integrity sha512-TA1yAY+ZvnJXMBfHb1/tJVXJBMAbfKpqni/9QUi2jS5By/iu0HZD5HXR94ixD5zFx3uimb/8+p/vBDHO3XFX0Q==
+"@amazee/ckeditor5-template@0.0.17":
+  version "0.0.17"
+  resolved "https://registry.yarnpkg.com/@amazee/ckeditor5-template/-/ckeditor5-template-0.0.17.tgz#0b392a7a367e034f935e594bbca0b779515d6ffa"
+  integrity sha512-LXzdxy1vW+nz3OFUtmDgiG5UTEptEq22RuNhO20z3aar+Qh5vF96HVfvU6mPcBvwp+u38zyNhTVJNXwy1sILNQ==
   dependencies:
     "@ckeditor/ckeditor5-core" "^11.1.0"
     "@ckeditor/ckeditor5-engine" "^12.0.0"
@@ -35,9 +33,9 @@
 
 "@amazee/editor-components@https://github.com/AmazeeLabs/editor-components.git":
   version "1.0.0"
-  resolved "https://github.com/AmazeeLabs/editor-components.git#6208278601a66e1369ebce9623ecc4b6f13f9a46"
+  resolved "https://github.com/AmazeeLabs/editor-components.git#f2e4edcafab0c0f14a31a9bb2c053a5a90aab797"
   dependencies:
-    lit-element "^2.0.0-rc.5"
+    lit-element "2.0.1"
     lit-html "^1.0.0"
 
 "@ckeditor/ckeditor5-autoformat@^10.0.4":
@@ -2441,7 +2439,7 @@ levn@~0.3.0:
     prelude-ls "~1.1.2"
     type-check "~0.3.2"
 
-lit-element@^2.0.0-rc.5:
+lit-element@2.0.1:
   version "2.0.1"
   resolved "https://registry.yarnpkg.com/lit-element/-/lit-element-2.0.1.tgz#9ec5871d3b64487f432c7c071df80ef031d7091b"
   integrity sha512-2bu3B2ZYUZgntvOgu3i5mRK8geo45CLUwxwJEYK54hyednoJasjiTZPB13NBg1D+hNM2JfmWTWJnh1QEUQv7zw==
