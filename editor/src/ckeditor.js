@@ -20,18 +20,26 @@ import Validation from '@amazee/ckeditor5-template/src/validation';
 import ButtonElement from '@amazee/ckeditor5-drupal-linkit/src/elements/buttonelement';
 import TemplateEditing from '@amazee/ckeditor5-template/src/templateediting';
 import RemoteControl from '@amazee/ckeditor5-template/src/remotecontrol';
+import TabsElement from '@amazee/ckeditor5-template/src/elements/tabselement'
+import GalleryElement from "@amazee/ckeditor5-template/src/elements/galleryelement";
+import MergeEditing from "@amazee/ckeditor5-template/src/mergeediting";
 
 import Placeholder from '@amazee/editor-components/components/placeholder/placeholder';
+import Media from '@amazee/editor-components/components/media/media';
 import '@amazee/editor-components/components/container/container';
 import '@amazee/editor-components/components/gallery/gallery';
+import '@amazee/editor-components/components/tabs/tabs';
+import '@amazee/editor-components/components/text_conflict/text_conflict';
+import '@amazee/editor-components/components/text_conflict/text_conflict_option/text_conflict_option';
 
-export default class SectionsEditor extends BalloonEditorBase {}
+export default class SectionsEditor extends BalloonEditorBase { }
 
 class PlaceholderConfig extends Plugin {
 	init() {
-		const templates = this.editor.config.get( 'templates' );
-		Placeholder.availableSections = Object.keys( templates )
-				.map( id => ( { id, label: templates[ id ].label, icon: templates[ id ].icon } ) );
+		const templates = this.editor.config.get('templates');
+		Placeholder.availableSections = Object.keys(templates)
+			.map(id => ({ id, label: templates[id].label, icon: templates[id].icon }));
+		Media.previewCallback = this.editor.config.get('drupalMediaRenderer').callback;
 	}
 }
 
@@ -55,7 +63,10 @@ SectionsEditor.builtinPlugins = [
 	TemplateEditing,
 	DrupalMedia,
 	Validation,
-	ButtonElement
+	ButtonElement,
+	TabsElement,
+	GalleryElement,
+	MergeEditing
 ];
 
 // Editor configuration.
@@ -80,7 +91,7 @@ SectionsEditor.defaultConfig = {
 			'mergeTableCells'
 		]
 	},
-	blockToolbar: [ 'heading', 'insertTable' ],
+	blockToolbar: ['heading', 'insertTable'],
 	// This value must be kept in sync with the language defined in webpack.config.js.
 	language: 'en'
 };
