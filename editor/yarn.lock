@@ -2,12 +2,11 @@
 # yarn lockfile v1
 
 
-"@amazee/ckeditor5-drupal-linkit@^0.0.10":
-  version "0.0.10"
-  resolved "https://registry.yarnpkg.com/@amazee/ckeditor5-drupal-linkit/-/ckeditor5-drupal-linkit-0.0.10.tgz#0de378c776d68d45788c312e9d4ce781a71845ff"
-  integrity sha512-KoxMbrhavG7Zt2ppN6rIJU23mJ1swAZXRTW80ERw2yGol2HVdSiCbILLE8SVed954GA7pWKOVJ2hRzL+/kg5nQ==
+"@amazee/ckeditor5-drupal-linkit@0.0.13":
+  version "0.0.13"
+  resolved "https://registry.yarnpkg.com/@amazee/ckeditor5-drupal-linkit/-/ckeditor5-drupal-linkit-0.0.13.tgz#a2a71d3ae9ebb577fdd9e23058b14e1e2a914db6"
+  integrity sha512-r08WTEXUsTWJ4baD/wdwxHVLYf0oBLXQSPgmPcLaONGTqStvIOfy6RLRhPmu8JC87NL2ddHRbILEkQa0VmJOYA==
   dependencies:
-    "@amazee/ckeditor5-template" "^0.0.14"
     "@ckeditor/ckeditor5-link" "^10.1.0"
 
 "@amazee/ckeditor5-drupal-media@0.0.20":
@@ -21,10 +20,10 @@
     "@ckeditor/ckeditor5-utils" "^11.1.0"
     "@ckeditor/ckeditor5-widget" "^10.3.1"
 
-"@amazee/ckeditor5-template@^0.0.14":
-  version "0.0.14"
-  resolved "https://registry.yarnpkg.com/@amazee/ckeditor5-template/-/ckeditor5-template-0.0.14.tgz#499b7da159a32bdd57ae0de3d419a402f9f5c524"
-  integrity sha512-TA1yAY+ZvnJXMBfHb1/tJVXJBMAbfKpqni/9QUi2jS5By/iu0HZD5HXR94ixD5zFx3uimb/8+p/vBDHO3XFX0Q==
+"@amazee/ckeditor5-template@0.0.20":
+  version "0.0.20"
+  resolved "https://registry.yarnpkg.com/@amazee/ckeditor5-template/-/ckeditor5-template-0.0.20.tgz#c7a40c60def1ae0268b60f7df1fd669e02341850"
+  integrity sha512-H4ve+mjLcmIUZiLwub5ANk+52N27hW+zoI3UPiYHpjErVO0NMRaV3jquaGWCSNG2WHWvlnYh/BWXKn6hRABzxg==
   dependencies:
     "@ckeditor/ckeditor5-core" "^11.1.0"
     "@ckeditor/ckeditor5-engine" "^12.0.0"
