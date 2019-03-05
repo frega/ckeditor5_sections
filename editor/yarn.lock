@@ -20,10 +20,10 @@
     "@ckeditor/ckeditor5-utils" "^11.1.0"
     "@ckeditor/ckeditor5-widget" "^10.3.1"
 
-"@amazee/ckeditor5-template@0.0.21":
-  version "0.0.21"
-  resolved "https://registry.yarnpkg.com/@amazee/ckeditor5-template/-/ckeditor5-template-0.0.21.tgz#1969ca8d185ed0e4a0f3cb498c7cfa5f8519c0c6"
-  integrity sha512-XuK2MqrY064i8NrsjnVjAcjRM7MtYCB2mKvX3qv61im5Vz9jUY2KJ0Xu2Ze+lK0/iq52bEuD3jWZmthz4MDizg==
+"@amazee/ckeditor5-template@0.0.25":
+  version "0.0.25"
+  resolved "https://registry.yarnpkg.com/@amazee/ckeditor5-template/-/ckeditor5-template-0.0.25.tgz#2e0c395fa757f67903ebc549612384c735f0229d"
+  integrity sha512-94wRba8QiVPibZsON448gyzRs+SAi7tLnfAlpXzsXuNU2WQEthcxqxw/ac1bUdwMobu25dqmRthxFl565DIwQQ==
   dependencies:
     "@ckeditor/ckeditor5-core" "^11.1.0"
     "@ckeditor/ckeditor5-engine" "^12.0.0"
@@ -33,7 +33,7 @@
 
 "@amazee/editor-components@https://github.com/AmazeeLabs/editor-components.git":
   version "1.0.0"
-  resolved "https://github.com/AmazeeLabs/editor-components.git#55022469f9b4e8a7f1ae11a42c83c33d8a1ba4a3"
+  resolved "https://github.com/AmazeeLabs/editor-components.git#90afb01acdf195c2dd8883454bff4caabbba3778"
   dependencies:
     "@storybook/html" "^4.1.12"
     lit-element "2.0.1"
@@ -1773,12 +1773,12 @@ atob@^2.1.1:
   integrity sha512-Wm6ukoaOGJi/73p/cl2GvLjTI5JM1k/O14isD73YML8StrH/7/lRFgmg8nICZgD3bZZvjwCGxtMOD3wWNAu8cg==
 
 autoprefixer@^9.3.1:
-  version "9.4.9"
-  resolved "https://registry.yarnpkg.com/autoprefixer/-/autoprefixer-9.4.9.tgz#0d3eb86bc1d1228551abcf55220d6fd246b6cb31"
-  integrity sha512-OyUl7KvbGBoFQbGQu51hMywz1aaVeud/6uX8r1R1DNcqFvqGUUy6+BDHnAZE8s5t5JyEObaSw+O1DpAdjAmLuw==
+  version "9.4.10"
+  resolved "https://registry.yarnpkg.com/autoprefixer/-/autoprefixer-9.4.10.tgz#e1be61fc728bacac8f4252ed242711ec0dcc6a7b"
+  integrity sha512-XR8XZ09tUrrSzgSlys4+hy5r2/z4Jp7Ag3pHm31U4g/CTccYPOVe19AkaJ4ey/vRd1sfj+5TtuD6I0PXtutjvQ==
   dependencies:
     browserslist "^4.4.2"
-    caniuse-lite "^1.0.30000939"
+    caniuse-lite "^1.0.30000940"
     normalize-range "^0.1.2"
     num2fraction "^1.2.2"
     postcss "^7.0.14"
@@ -2324,9 +2324,9 @@ camelcase-css@^2.0.0:
   integrity sha512-QOSvevhslijgYwRx6Rv7zKdMF8lbRmx+uQGx2+vDc+KI/eBnsy9kit5aj23AgGu3pa4t9AgwbnXWqS+iOY+2aA==
 
 camelcase@^5.0.0:
-  version "5.1.0"
-  resolved "https://registry.yarnpkg.com/camelcase/-/camelcase-5.1.0.tgz#29e83b9cfaf7ad478f401a187ae089cf83c257ea"
-  integrity sha512-WP9f9OBL/TAbwOFBJL79FoS9UKUmnp82RWnhlwTgrAJeMq7lytHhe0Jzc6/P7Zq0+2oviXJuPlvkZalWUug9gg==
+  version "5.2.0"
+  resolved "https://registry.yarnpkg.com/camelcase/-/camelcase-5.2.0.tgz#e7522abda5ed94cc0489e1b8466610e88404cf45"
+  integrity sha512-IXFsBS2pC+X0j0N/GE7Dm7j3bsEBp+oTpb7F50dwEVX7rf3IgwO9XatnegTsDtniKCUtEJH4fSU6Asw7uoVLfQ==
 
 caniuse-api@^3.0.0:
   version "3.0.0"
@@ -2343,10 +2343,10 @@ caniuse-lite@^1.0.0, caniuse-lite@^1.0.30000929:
   resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30000938.tgz#b64bf1427438df40183fce910fe24e34feda7a3f"
   integrity sha512-ekW8NQ3/FvokviDxhdKLZZAx7PptXNwxKgXtnR5y+PR3hckwuP3yJ1Ir+4/c97dsHNqtAyfKUGdw8P4EYzBNgw==
 
-caniuse-lite@^1.0.30000884, caniuse-lite@^1.0.30000939:
-  version "1.0.30000940"
-  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30000940.tgz#19f2b1497fbfa5b96b615963097c3757f27989ce"
-  integrity sha512-rp/086IBUfCsNgBpko6DGQv674jRjeXPesDatDB2kxrkmDfD+S5Gesw+uT8YjpRWvLKLMRBy72SLRZ8I0EgQFw==
+caniuse-lite@^1.0.30000884, caniuse-lite@^1.0.30000939, caniuse-lite@^1.0.30000940:
+  version "1.0.30000941"
+  resolved "https://registry.yarnpkg.com/caniuse-lite/-/caniuse-lite-1.0.30000941.tgz#f0810802b2ab8d27f4b625d4769a610e24d5a42c"
+  integrity sha512-4vzGb2MfZcO20VMPj1j6nRAixhmtlhkypM4fL4zhgzEucQIYiRzSqPcWIu1OF8i0FETD93FMIPWfUJCAcFvrqA==
 
 case-sensitive-paths-webpack-plugin@^2.1.2:
   version "2.2.0"
