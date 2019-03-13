@@ -23,6 +23,7 @@ import RemoteControl from '@amazee/ckeditor5-template/src/remotecontrol';
 import TabsElement from '@amazee/ckeditor5-template/src/elements/tabselement'
 import GalleryElement from "@amazee/ckeditor5-template/src/elements/galleryelement";
 import MergeEditing from "@amazee/ckeditor5-template/src/mergeediting";
+import TextConstraintElement from "@amazee/ckeditor5-template/src/elements/textconstraintelement";
 
 import Placeholder from '@amazee/editor-components/components/placeholder/placeholder';
 import Media from '@amazee/editor-components/components/media/media';
@@ -31,6 +32,8 @@ import '@amazee/editor-components/components/gallery/gallery';
 import '@amazee/editor-components/components/tabs/tabs';
 import '@amazee/editor-components/components/text_conflict/text_conflict';
 import '@amazee/editor-components/components/text_conflict/text_conflict_option/text_conflict_option';
+import '@amazee/editor-components/components/textfield/textfield';
+import '@amazee/editor-components/components/button/button';
 
 export default class SectionsEditor extends BalloonEditorBase { }
 
@@ -66,7 +69,8 @@ SectionsEditor.builtinPlugins = [
 	ButtonElement,
 	TabsElement,
 	GalleryElement,
-	MergeEditing
+	MergeEditing,
+  TextConstraintElement
 ];
 
 // Editor configuration.

@@ -73,7 +73,6 @@
         values.attributes.href += '#' + values.attributes.fragment;
       }
       currentCallback(values.attributes);
-      editors[element.id].execute( 'link', values.attributes);
     });
 
     window.ckeditor5_sections_builds = window.ckeditor5_sections_builds || {};
