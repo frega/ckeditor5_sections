@@ -61,6 +61,7 @@
     "url": "https://github.com/ckeditor/ckeditor5-build-balloon.git"
   },
   "scripts": {
+    "upgrade-components": "yarn upgrade @amazee/editor-components@https://github.com/AmazeeLabs/editor-components.git",
     "build": "webpack --mode production",
     "preversion": "npm run build; if [ -n \"$(git status src/ckeditor.js build/ --porcelain)\" ]; then git add -u src/ckeditor.js build/ && git commit -m 'Internal: Build.'; fi"
   },

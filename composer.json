@@ -1,0 +1,8 @@
+{
+  "name": "drupal/ckeditor5_sections",
+  "type": "drupal-module",
+  "description": "Structured WYSIWYG editing for Drupal.",
+  "homepage": "http://drupal.org/project/ckeditor5_sections",
+  "license": "GPL-2.0+",
+  "minimum-stability": "dev"
+}
