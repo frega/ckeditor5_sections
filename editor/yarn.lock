@@ -2,17 +2,15 @@
 # yarn lockfile v1
 
 
-"@amazee/ckeditor5-drupal-linkit@0.0.14":
+"@amazee/ckeditor5-drupal-linkit@https://github.com/AmazeeLabs/ckeditor5-drupal-linkit":
   version "0.0.14"
-  resolved "https://registry.yarnpkg.com/@amazee/ckeditor5-drupal-linkit/-/ckeditor5-drupal-linkit-0.0.14.tgz#107ee56bc75bc0bffb09583f3d47afe73ae4e51e"
-  integrity sha512-RzQQ7Bdm2/37APt9Vkxi3+IlWTesJ0j1cTh6/AvxLqCgHArhKpZR8FB+AOxfTjxbOHtTHcwZjAiRi4Dy+QFBYw==
+  resolved "https://github.com/AmazeeLabs/ckeditor5-drupal-linkit#de6b493206d1dca21d156fd9351c116389eb2e03"
   dependencies:
     "@ckeditor/ckeditor5-link" "^10.1.0"
 
-"@amazee/ckeditor5-drupal-media@0.0.20":
+"@amazee/ckeditor5-drupal-media@https://github.com/AmazeeLabs/ckeditor5-drupal-media":
   version "0.0.20"
-  resolved "https://registry.yarnpkg.com/@amazee/ckeditor5-drupal-media/-/ckeditor5-drupal-media-0.0.20.tgz#6dc9ea151e119dc80e9c30d98d883f56a6488682"
-  integrity sha512-9hHi5Y77Vua2KukMS1ZIOaG0bRQ3pL9z7C3hPCp2CP0t8OQsMVdkH0AjzMC7j13I8GRJGtoJKCOr5X65J3jsEw==
+  resolved "https://github.com/AmazeeLabs/ckeditor5-drupal-media#61d4c8394de888c668dada59ff49462948d3256b"
   dependencies:
     "@ckeditor/ckeditor5-core" "^11.1.0"
     "@ckeditor/ckeditor5-engine" "^12.0.0"
@@ -20,10 +18,9 @@
     "@ckeditor/ckeditor5-utils" "^11.1.0"
     "@ckeditor/ckeditor5-widget" "^10.3.1"
 
-"@amazee/ckeditor5-template@0.0.27":
+"@amazee/ckeditor5-template@https://github.com/AmazeeLabs/ckeditor5-template":
   version "0.0.27"
-  resolved "https://registry.yarnpkg.com/@amazee/ckeditor5-template/-/ckeditor5-template-0.0.27.tgz#63986c56af0f504a1e69786fae60cd787da6ce85"
-  integrity sha512-tds5e/5I22VSP5j3jkjTm86HJn1vP/ODj+I0uAFOnapN/l69TRKNEAzfBvI9/FMuxv9BjMDg+LA9qZ5GsT1GEg==
+  resolved "https://github.com/AmazeeLabs/ckeditor5-template#5f4e2f2ca018308e7a364151eb7de7648cbee37c"
   dependencies:
     "@ckeditor/ckeditor5-core" "^11.1.0"
     "@ckeditor/ckeditor5-engine" "^12.0.0"
