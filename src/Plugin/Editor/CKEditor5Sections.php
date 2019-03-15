@@ -60,13 +60,6 @@ class CKEditor5Sections extends EditorBase implements ContainerFactoryPluginInte
   protected $languageManager;
 
   /**
-   * The CKEditor plugin manager.
-   *
-   * @var \Drupal\ckeditor\CKEditorPluginManager
-   */
-  protected $ckeditorPluginManager;
-
-  /**
    * The renderer.
    *
    * @var \Drupal\Core\Render\RendererInterface
@@ -109,7 +102,6 @@ class CKEditor5Sections extends EditorBase implements ContainerFactoryPluginInte
    */
   public function __construct(
     array $configuration, $plugin_id, $plugin_definition,
-    CKEditorPluginManager $ckeditor_plugin_manager,
     ModuleHandlerInterface $module_handler,
     LanguageManagerInterface $language_manager,
     RendererInterface $renderer,
@@ -117,7 +109,6 @@ class CKEditor5Sections extends EditorBase implements ContainerFactoryPluginInte
     EntityTypeManagerInterface $entityTypeManager
   ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
-    $this->ckeditorPluginManager = $ckeditor_plugin_manager;
     $this->moduleHandler = $module_handler;
     $this->languageManager = $language_manager;
     $this->renderer = $renderer;
@@ -137,7 +128,6 @@ class CKEditor5Sections extends EditorBase implements ContainerFactoryPluginInte
       $configuration,
       $plugin_id,
       $plugin_definition,
-      $container->get('plugin.manager.ckeditor.plugin'),
       $container->get('module_handler'),
       $container->get('language_manager'),
       $container->get('renderer'),
