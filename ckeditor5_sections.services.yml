@@ -3,3 +3,6 @@ services:
     class: Drupal\ckeditor5_sections\Routing\RouteSubscriber
     tags:
     - { name: event_subscriber }
+  ckeditor5_sections.sections_collector:
+    class: Drupal\ckeditor5_sections\SectionsCollector
+    arguments: ['@config.factory']
