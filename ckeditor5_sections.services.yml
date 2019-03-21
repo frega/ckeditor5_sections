@@ -6,3 +6,5 @@ services:
   ckeditor5_sections.sections_collector:
     class: Drupal\ckeditor5_sections\SectionsCollector
     arguments: ['@config.factory']
+  ckeditor5_sections.document_parser:
+    class: Drupal\ckeditor5_sections\DocumentParser
