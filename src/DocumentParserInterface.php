@@ -27,7 +27,7 @@ interface DocumentParserInterface {
    *     The type of the field can be have any Drupal typed data value.
    *  Example of a returned result:
    * [
-   *   'teaser' => [
+   *   'document_object:teaser' => [
    *     'fields' => [
    *        'layout' => [
    *          'label' => 'layout',
@@ -35,7 +35,7 @@ interface DocumentParserInterface {
    *        ],
    *        'image' => [
    *          'label' => 'image',
-   *          'type' => 'image',
+   *          'type' => 'document_object:image',
    *        ],
    *        'text' => [
    *          'label' => 'text',
@@ -43,7 +43,7 @@ interface DocumentParserInterface {
    *        ],
    *      ],
    *    ],
-   *   'image' => [
+   *   'document_object:image' => [
    *     'fields' => [
    *        'mediaType' => [
    *          'label' => 'mediaType',

@@ -100,7 +100,7 @@ class DocumentObjectDataDefinition extends MapDataDefinition {
   protected function getObjectsDefinitionFromTemplate($template) {
     // @todo: Properly implement this method.
     return[
-      'teaser' => [
+      'document_object:teaser' => [
         'fields' => [
           'layout' => [
             'label' => 'layout',
@@ -128,7 +128,7 @@ class DocumentObjectDataDefinition extends MapDataDefinition {
           ]
         ],
       ],
-      'image' => [
+      'document_object:image' => [
         'fields' => [
           'mediaType' => [
             'label' => 'mediaType',
@@ -144,7 +144,7 @@ class DocumentObjectDataDefinition extends MapDataDefinition {
           ]
         ],
       ],
-      'button' => [
+      'document_object:button' => [
         'fields' => [
           'content' => [
             'label' => 'content',
