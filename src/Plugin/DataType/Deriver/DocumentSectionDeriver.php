@@ -30,11 +30,34 @@ class DocumentSectionDeriver extends DeriverBase {
    * @return DocumentSectionType[]
    */
   protected function getSectionTypes() {
-    // @todo: Properly implement the section types retrieval.
-    return [
-      'teaser' => new DocumentSectionType('teaser'),
-      'image' => new DocumentSectionType('image'),
-      'button' => new DocumentSectionType('button'),
-    ];
+    $templates = $this->getAvailableTemplates();
+    $section_types = [];
+    foreach ($templates as $template) {
+      $section_types = array_merge($section_types, $this->getSectionDefinitionsFromTemplate($template['template']));
+    }
+    return array_map(function($section) {
+      return new DocumentSectionType($section['type']);
+    }, $section_types);
+  }
+
+  /**
+   * Returns an array with all the available templates from the system.
+   *
+   * @return array
+   *  An array of all the available sections.
+   */
+  protected function getAvailableTemplates() {
+    return \Drupal::getContainer()->get('ckeditor5_sections.sections_collector')->collectSections();
+  }
+
+  /**
+   * Extracts the sections definitions (fields and possibly other metadata) from
+   * a template.
+   *
+   * @param string $template
+   * @return array
+   */
+  protected function getSectionDefinitionsFromTemplate($template) {
+    return \Drupal::getContainer()->get('ckeditor5_sections.document_parser')->extractSectionDefinitions($template);
   }
 }

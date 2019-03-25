@@ -28,7 +28,9 @@ class SectionsCollector implements SectionsCollectorInterface {
    */
   public function collectSections($directory = NULL) {
     if (empty($directory)) {
-      $this->configFactory->get('editor.editor.ckeditor5_sections')->get('templateDirectory');
+      // @todo: this needs to be changed so that it will check all the editors
+      // which have the ckeditor5_sections plugin enabled.
+      $directory = $this->configFactory->get('editor.editor.sections')->get('settings.templateDirectory');
     }
     $files = file_scan_directory($directory, '/.*.yml/');
     $sections = [];

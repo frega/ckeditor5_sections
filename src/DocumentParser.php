@@ -2,6 +2,12 @@
 
 namespace Drupal\ckeditor5_sections;
 
+use Drupal\ckeditor5_sections\Plugin\DataType\DocumentSection;
+use Drupal\Core\TypedData\ComplexDataDefinitionInterface;
+use Drupal\Core\TypedData\ComplexDataInterface;
+use Drupal\Core\TypedData\ListDataDefinitionInterface;
+use Drupal\Core\TypedData\ListInterface;
+
 /**
  * Parser class for extracting the section definitions and data from
  * templates and documents.
@@ -43,6 +49,18 @@ class DocumentParser implements DocumentParserInterface {
   }
 
   /**
+   * {@inheritdoc}
+   */
+  public function extractSectionData($document) {
+    $dom = new \DOMDocument();
+    $dom->loadHTML(mb_convert_encoding($document, 'HTML-ENTITIES', 'UTF-8'), LIBXML_NOERROR);
+    $list_definition = \Drupal::typedDataManager()->createListDataDefinition('section');
+    $result = \Drupal::typedDataManager()->create($list_definition);
+    $this->buildSectionData($dom, $result);
+    return $result;
+  }
+
+  /**
    * Recursively traverses a dom and extracts the section definitions.
    *
    * @param \DOMNode $node
@@ -57,7 +75,7 @@ class DocumentParser implements DocumentParserInterface {
       // Check if the current element is a type. If yes, we will add all its
       // attributes to the result.
       if ($node->hasAttribute('itemtype')) {
-        $type = 'section:' . $node->getAttribute('itemtype');
+        $type = $node->getAttribute('itemtype');
         // We also update the new parent type which will be used when processing
         // the children of the current node.
         $newParentType = $type;
@@ -69,6 +87,7 @@ class DocumentParser implements DocumentParserInterface {
           // of type string. This will contain the whole html or xml extracted
           // data.
           $result[$type] = [
+            'type' => $type,
             'fields' => [
               'content' => [
                 'label' => 'content',
@@ -130,6 +149,119 @@ class DocumentParser implements DocumentParserInterface {
     }
   }
 
+  public function buildSectionData(\DOMNode $node, ListInterface $result, ComplexDataInterface $parent = NULL) {
+    $new_result = $result;
+    $new_parent = $parent;
+    $update_new_result = FALSE;
+    $update_new_parent = FALSE;
+    if ($node instanceof \DOMElement) {
+      $value = [
+        'item_type' => NULL,
+        'item_cardinality' => 'single',
+      ];
+      // If the element has an itemprop attribute, and we are in the context of
+      // a parent, then we extract the item type and its cardinality from the
+      // data definition we have in the system. If the element has an itemprop,
+      // but we are not in the context of a parent then we can't say what type
+      // is, unless it has an itemtype attribute.
+      if ($node->hasAttribute('itemprop') && !empty($parent)) {
+        $parent_type = $parent->getDataDefinition()->getDataType();
+        $field_name = $node->getAttribute('itemprop');
+        $value['field_name'] = $field_name;
+        /* @var \Drupal\Core\TypedData\ComplexDataDefinitionInterface $data_definition */
+        $data_definition = \Drupal::typedDataManager()->createDataDefinition($parent_type);
+        $field_definition = $data_definition->getPropertyDefinition($field_name);
+        // @todo: throw an exception maybe?
+        if (!empty($field_definition)) {
+          // If the field data definition is an instance of ListDataDefinition,
+          // then the cardinality is multiple.
+          if ($field_definition instanceof ListDataDefinitionInterface) {
+            $value['item_cardinality'] = 'multiple';
+          }
+          $value['item_type'] = $field_definition->getDataType();
+        }
+      }
+      elseif ($node->hasAttribute('itemtype')) {
+        $value['item_type'] = $node->getAttribute('itemtype');
+      }
+
+      // We only process the actual item if we could extract the item type.
+      if (!empty($value['item_type'])) {
+        if ($value['item_cardinality'] === 'multiple') {
+          $item_field_definition = \Drupal::typedDataManager()->createListDataDefinition($value['item_type']);
+          $item_field_data = \Drupal::typedDataManager()->create($item_field_definition);
+          //$new_result = $item_field_data;
+          $update_new_result = TRUE;
+        }
+        else {
+          $item_field_definition = \Drupal::typedDataManager()->createDataDefinition($value['item_type']);
+          // If the field is a complex field, then we need to additionally check
+          // the values of the attributes.
+          if ($item_field_definition instanceof ComplexDataDefinitionInterface) {
+            /* @var \Drupal\Core\TypedData\ComplexDataInterface $item_field_data */
+            $item_field_data = \Drupal::typedDataManager()->create($item_field_definition);
+            // Add all the attributes.
+            foreach ($node->attributes as $attribute) {
+              $attributeName = $attribute->nodeName;
+              // Make sure that the 'data-*' attributes are properly converted to
+              // camel case.
+              if (strpos($attributeName, 'data-') === 0) {
+                $attributeName = $this->convertDataAttributeName($attributeName);
+              }
+              // Add the attribute to the current value.
+              if ($item_field_definition->getPropertyDefinition($attributeName)) {
+                $item_field_data->set($attributeName, $node->getAttribute($attribute->nodeName));
+              }
+            }
+            $item_field_data->set('content', $this->getDOMInnerHtml($node));
+            //$new_parent = $item_field_data;
+            $update_new_parent = TRUE;
+          }
+          else {
+            // If the field is just a simple (scalar) field, then we just dump
+            // the entire html of th node in it for now.
+            $item_field_data = \Drupal::typedDataManager()->create($item_field_definition, $this->getDOMInnerHtml($node));
+          }
+        }
+        // If we are in the context of a parent, then just set the item data
+        // to the proper field name.
+        if (!empty($parent)) {
+          if (!empty($value['field_name'])) {
+            $parent->set($value['field_name'], $item_field_data->getValue());
+            if ($update_new_result) {
+              $new_result = $parent->get($value['field_name']);
+            }
+            if ($update_new_parent) {
+              $new_parent = $parent->get($value['field_name']);
+            }
+          }
+        }
+        // If we are not in the context of a parent, we just append the data
+        // to the result array.
+        else {
+          $appended_item = $result->appendItem($item_field_data->getValue());
+          // Hack to make sure we preserve the data type, because the data
+          // definition for the lists will only be 'section'
+          //$appended_item->getDataDefinition()->
+          $appended_item->getDataDefinition()->setDataType($item_field_data->getDataDefinition()->getDataType());
+          $appended_item->getDataDefinition()->setSectionType('teaser');
+          if ($update_new_result) {
+            $new_result = $appended_item;
+          }
+          if ($update_new_parent) {
+            $new_parent = $appended_item;
+          }
+        }
+      }
+    }
+    // Process all the children of the current node, if any.
+    if ($node->hasChildNodes()) {
+      foreach (iterator_to_array($node->childNodes) as $child) {
+        $this->buildSectionData($child, $new_result, $new_parent);
+      }
+    }
+  }
+
   /**
    * Converts a data attribute name to camel case, according to
    * https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/dataset
@@ -154,5 +286,21 @@ class DocumentParser implements DocumentParserInterface {
       }
     }
     return implode('', $chrArray);
+  }
+
+  /**
+   * Returns the inner html of a DOM node.
+   *
+   * @param \DOMNode $node
+   *  The DOM node.
+   * @return string
+   *  The html result.
+   */
+  protected function getDOMInnerHtml(\DOMNode $node) {
+    $innerHTML = "";
+    foreach ($node->childNodes as $child) {
+      $innerHTML .= $node->ownerDocument->saveHTML($child);
+    }
+    return $innerHTML;
   }
 }

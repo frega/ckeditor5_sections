@@ -12,17 +12,17 @@ class DocumentParserTest extends UnitTestCase {
 
   /**
    * @covers \Drupal\ckeditor5_sections\DocumentParser::extractSectionDefinitions
-   * @dataProvider extractObjectDefinitionsProvider
+   * @dataProvider extractSectionDefinitionsProvider
    */
-  public function testExtractObjectDefinitions($template, $result) {
+  public function testExtractSectionDefinitions($template, $result) {
     $documentParser = new DocumentParser();
     $this->assertArrayEquals($result, $documentParser->extractSectionDefinitions($template));
   }
 
   /**
-   * Data provider for testExtractObjectDefinitions().
+   * Data provider for testExtractSectionDefinitions().
    */
-  public function extractObjectDefinitionsProvider() {
+  public function extractSectionDefinitionsProvider() {
     return [
       [
         <<<XML
@@ -55,7 +55,8 @@ class DocumentParserTest extends UnitTestCase {
 </div>
 XML,
         [
-          'section:teaser' => [
+          'teaser' => [
+            'type' =>'teaser',
             'fields' => [
               'layout' => [
                 'label' => 'layout',
@@ -88,7 +89,8 @@ XML,
               ]
             ],
           ],
-          'section:image' => [
+          'image' => [
+            'type' => 'image',
             'fields' => [
               'mediaType' => [
                 'label' => 'mediaType',
@@ -104,7 +106,8 @@ XML,
               ]
             ],
           ],
-          'section:button' => [
+          'button' => [
+            'type' => 'button',
             'fields' => [
               'content' => [
                 'label' => 'content',

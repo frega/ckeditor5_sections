@@ -17,17 +17,21 @@ interface DocumentParserInterface {
    * parameter is actually just the content (string) of the document and should
    * be a valid XML string.
    *
+   * @param string $document
+   *  The document to be parsed.
    * @return array
    *  The section definitions. The keys of the items in the array represent the
    *  type of the section. The values are associative arrays with the following
    *  keys:
+   *   - type: The type of the section.
    *   - fields: An array with all the fields of the section type. Each key
    *     identifies the field name, and each value contains another array with
    *     at least two keys: the label of the field and the type of the field.
    *     The type of the field can be have any Drupal typed data value.
    *  Example of a returned result:
    * [
-   *   'section:teaser' => [
+   *   'teaser' => [
+   *     'type' => 'teaser',
    *     'fields' => [
    *        'layout' => [
    *          'label' => 'layout',
@@ -43,7 +47,8 @@ interface DocumentParserInterface {
    *        ],
    *      ],
    *    ],
-   *   'section:image' => [
+   *   'image' => [
+   *     'type' => 'image',
    *     'fields' => [
    *        'mediaType' => [
    *          'label' => 'mediaType',
@@ -59,5 +64,15 @@ interface DocumentParserInterface {
    */
   public function extractSectionDefinitions($document);
 
-  // @todo: define the method for extracting the data.
+  /**
+   * Extracts the section data from a document.
+   *
+   * The data has to match the section definition we have
+   *
+   * @param string $document
+   *  The document to be parsed for the data.
+   * @return mixed
+   *  The extracted data.
+   */
+  public function extractSectionData($document);
 }

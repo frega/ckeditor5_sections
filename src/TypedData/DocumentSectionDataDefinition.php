@@ -15,15 +15,17 @@ class DocumentSectionDataDefinition extends MapDataDefinition {
    * {@inheritdoc}
    */
   public static function create($section_type = NULL) {
+    $data_type = 'section';
     if (!empty($section_type)) {
       $data_type = "section:{$section_type}";
-      $values = \Drupal::typedDataManager()->getDefinition($data_type);
-      $definition = new static(is_array($values) ? $values : []);
-      $definition->setDataType($data_type);
-      $definition->setSectionType($section_type);
-      return $definition;
     }
-    return new static([]);
+    $values = \Drupal::typedDataManager()->getDefinition($data_type);
+    $definition = new static(is_array($values) ? $values : []);
+    $definition->setDataType($data_type);
+    if (!empty($section_type)) {
+      $definition->setSectionType($section_type);
+    }
+    return $definition;
   }
 
   /**
@@ -63,12 +65,12 @@ class DocumentSectionDataDefinition extends MapDataDefinition {
    */
   public function getPropertyDefinitions() {
     if (!isset($this->propertyDefinitions)) {
-      $this->propertyDefinitions = [];
       if ($section_type = $this->getSectionType()) {
+        $this->propertyDefinitions = [];
         $templates = $this->getAvailableTemplates();
         $section_types = [];
         foreach ($templates as $template) {
-          $section_types = array_merge($section_types, $this->getSectionsDefinitionFromTemplate($template['template']));
+          $section_types = array_merge($section_types, $this->getSectionDefinitionsFromTemplate($template['template']));
         }
         if (!empty($section_types[$section_type])) {
           foreach ($section_types[$section_type]['fields'] as $field_name => $field) {
@@ -104,61 +106,7 @@ class DocumentSectionDataDefinition extends MapDataDefinition {
    * @param string $template
    * @return array
    */
-  protected function getSectionsDefinitionFromTemplate($template) {
-    // @todo: Properly implement this method.
-    return[
-      'section:teaser' => [
-        'fields' => [
-          'layout' => [
-            'label' => 'layout',
-            'type' => 'string,'
-          ],
-          'image' => [
-            'label' => 'image',
-            'type' => 'section:image',
-          ],
-          'headline' => [
-            'label' => 'headline',
-            'type' => 'string'
-          ],
-          'text' => [
-            'label' => 'text',
-            'type' => 'string'
-          ],
-          'link' => [
-            'label' => 'link',
-            'type' => 'section:button'
-          ],
-          'content' => [
-            'label' => 'content',
-            'type' => 'string',
-          ]
-        ],
-      ],
-      'section:image' => [
-        'fields' => [
-          'mediaType' => [
-            'label' => 'mediaType',
-            'type' => 'string',
-          ],
-          'mediaUuid' => [
-            'label' => 'mediaUuid',
-            'type' => 'string',
-          ],
-          'content' => [
-            'label' => 'content',
-            'type' => 'string',
-          ]
-        ],
-      ],
-      'section:button' => [
-        'fields' => [
-          'content' => [
-            'label' => 'content',
-            'type' => 'string',
-          ]
-        ],
-      ],
-    ];
+  protected function getSectionDefinitionsFromTemplate($template) {
+    return \Drupal::getContainer()->get('ckeditor5_sections.document_parser')->extractSectionDefinitions($template);
   }
 }
