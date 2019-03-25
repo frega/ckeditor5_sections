@@ -3,7 +3,7 @@
 namespace Drupal\ckeditor5_sections;
 
 /**
- * Parser class for extracting the object definitions and data from
+ * Parser class for extracting the section definitions and data from
  * templates and documents.
  */
 class DocumentParser implements DocumentParserInterface {
@@ -11,12 +11,12 @@ class DocumentParser implements DocumentParserInterface {
   /**
    * {@inheritdoc}
    */
-  public function extractObjectDefinitions($document) {
-    // The following rules apply when extracting the object definitions from a
+  public function extractSectionDefinitions($document) {
+    // The following rules apply when extracting the section definitions from a
     // document:
     // 1. If the element has the 'itemtype' attribute, it is treated like an
-    // object. All of its attributes, except the 'class' and 'ck-*' are treated
-    // like properties (fields) on the object, of type string. The 'data-*'
+    // section. All of its attributes, except the 'class' and 'ck-*' are treated
+    // like properties (fields) on the section, of type string. The 'data-*'
     // attributes are converted to properties according to
     // https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/dataset
     // @todo: handle the case when the same item type appears more times, and check for recursion.
@@ -29,7 +29,7 @@ class DocumentParser implements DocumentParserInterface {
     // If the 'itemtype' is empty, then the type will be set to string. If there
     // is an 'itemtype' then this will become the type of the field.
 
-    // 3. All the object types will have an additional field which is called
+    // 3. All the section types will have an additional field which is called
     // 'content', of type string. The value should contain the actual html or
     // xml content of the field, when the data will be extracted.
 
@@ -38,26 +38,26 @@ class DocumentParser implements DocumentParserInterface {
     // https://davidwalsh.name/domdocument-utf8-problem
     $dom->loadHTML(mb_convert_encoding($document, 'HTML-ENTITIES', 'UTF-8'), LIBXML_NOERROR);
     $result = [];
-    $this->buildObjectsDefinition($dom, $result);
+    $this->buildSectionDefinitions($dom, $result);
     return $result;
   }
 
   /**
-   * Recursively traverses a dom and extracts the object definitions.
+   * Recursively traverses a dom and extracts the section definitions.
    *
    * @param \DOMNode $node
    *  The node currently being processed.
    * @param $result
    *  The extraction result.
    */
-  protected function buildObjectsDefinition(\DOMNode $node, &$result, $parentType = '') {
+  protected function buildSectionDefinitions(\DOMNode $node, &$result, $parentType = '') {
     // If the current node is a DOMElement, process it.
     $newParentType = $parentType;
     if ($node instanceof \DOMElement) {
       // Check if the current element is a type. If yes, we will add all its
       // attributes to the result.
       if ($node->hasAttribute('itemtype')) {
-        $type = 'document_object:' . $node->getAttribute('itemtype');
+        $type = 'section:' . $node->getAttribute('itemtype');
         // We also update the new parent type which will be used when processing
         // the children of the current node.
         $newParentType = $type;
@@ -65,7 +65,7 @@ class DocumentParser implements DocumentParserInterface {
         // result. For now, we just keep processing the data, so we will just
         // merge any new fields, but we may want to change this in the future.
         if (empty($result[$type])) {
-          // Also, all the objects will have by default a field named 'content'
+          // Also, all the sections will have by default a field named 'content'
           // of type string. This will contain the whole html or xml extracted
           // data.
           $result[$type] = [
@@ -106,19 +106,26 @@ class DocumentParser implements DocumentParserInterface {
         // The type of the field depends actually on the itemtype property. If
         // there is an itemtype, it will just be used as the type, otherwise
         // the type will be 'string'.
-        $itemtype = $node->hasAttribute('itemtype') ? 'document_object:' . $node->getAttribute('itemtype') : 'string';
+        $itemtype = $node->hasAttribute('itemtype') ? 'section:' . $node->getAttribute('itemtype') : 'string';
+        if ($node->hasAttribute('ck-contains')) {
+          $itemtype = 'section';
+        }
         $fieldName = $node->getAttribute('itemprop');
         $result[$parentType]['fields'][$fieldName] = [
           'label' => $fieldName,
           'type' => $itemtype,
         ];
+        $ck_type = $node->hasAttribute('ck-type') ? $node->getAttribute('ck-type') : '';
+        if (in_array($ck_type, ['container', 'gallery', 'tabs'])) {
+          $result[$parentType]['fields'][$fieldName]['cardinality'] = 'multiple';
+        }
       }
     }
 
     // Process all the children of the current node, if any.
     if ($node->hasChildNodes()) {
       foreach (iterator_to_array($node->childNodes) as $child) {
-        $this->buildObjectsDefinition($child, $result, $newParentType);
+        $this->buildSectionDefinitions($child, $result, $newParentType);
       }
     }
   }

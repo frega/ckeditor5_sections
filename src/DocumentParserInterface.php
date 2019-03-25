@@ -7,27 +7,27 @@ namespace Drupal\ckeditor5_sections;
  *
  * The document parser classes are able to do two things: to parse a document
  * (usually a template) to get all the metadata information about the contained
- * object types and their fields and to parse a data document in order to
+ * section types and their fields and to parse a data document in order to
  * extract its actual data.
  */
 interface DocumentParserInterface {
 
   /**
-   * Extracts the object definitions from a document, sent as a parameter. The
+   * Extracts the section definitions from a document, sent as a parameter. The
    * parameter is actually just the content (string) of the document and should
    * be a valid XML string.
    *
    * @return array
-   *  The object definitions. The keys of the items in the array represent the
-   *  type of the object. The values are associative arrays with the following
+   *  The section definitions. The keys of the items in the array represent the
+   *  type of the section. The values are associative arrays with the following
    *  keys:
-   *   - fields: An array with all the fields of the object type. Each key
+   *   - fields: An array with all the fields of the section type. Each key
    *     identifies the field name, and each value contains another array with
    *     at least two keys: the label of the field and the type of the field.
    *     The type of the field can be have any Drupal typed data value.
    *  Example of a returned result:
    * [
-   *   'document_object:teaser' => [
+   *   'section:teaser' => [
    *     'fields' => [
    *        'layout' => [
    *          'label' => 'layout',
@@ -35,7 +35,7 @@ interface DocumentParserInterface {
    *        ],
    *        'image' => [
    *          'label' => 'image',
-   *          'type' => 'document_object:image',
+   *          'type' => 'section:image',
    *        ],
    *        'text' => [
    *          'label' => 'text',
@@ -43,7 +43,7 @@ interface DocumentParserInterface {
    *        ],
    *      ],
    *    ],
-   *   'document_object:image' => [
+   *   'section:image' => [
    *     'fields' => [
    *        'mediaType' => [
    *          'label' => 'mediaType',
@@ -57,7 +57,7 @@ interface DocumentParserInterface {
    *    ]
    * ]
    */
-  public function extractObjectDefinitions($document);
+  public function extractSectionDefinitions($document);
 
   // @todo: define the method for extracting the data.
 }

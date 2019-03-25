@@ -3,19 +3,19 @@
 namespace Drupal\ckeditor5_sections\TypedData;
 
 /**
- * The DocumentObjectType class.
+ * The DocumentSectionType class.
  *
  * For now this just contains the type information, but we can use this to add
- * other metadata for object types in the future.
+ * other metadata for section types in the future.
  */
-class DocumentObjectType implements DocumentObjectTypeInterface {
+class DocumentSectionType implements DocumentSectionTypeInterface {
 
   protected $type;
 
   /**
-   * DocumentObjectType constructor.
+   * DocumentSectionType constructor.
    * @param $type
-   *  The type of the object.
+   *  The type of the section.
    */
   public function __construct($type) {
     $this->type = $type;

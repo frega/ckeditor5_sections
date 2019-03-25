@@ -3,23 +3,24 @@
 namespace Drupal\ckeditor5_sections\TypedData;
 
 use Drupal\Core\TypedData\DataDefinition;
+use Drupal\Core\TypedData\ListDataDefinition;
 use Drupal\Core\TypedData\MapDataDefinition;
 
 /**
- * Data definition class for the DocumentObject typed data plugins.
+ * Data definition class for the DocumentSection typed data plugins.
  */
-class DocumentObjectDataDefinition extends MapDataDefinition {
+class DocumentSectionDataDefinition extends MapDataDefinition {
 
   /**
    * {@inheritdoc}
    */
-  public static function create($object_type = NULL) {
-    if (!empty($object_type)) {
-      $data_type = "document_object:{$object_type}";
+  public static function create($section_type = NULL) {
+    if (!empty($section_type)) {
+      $data_type = "section:{$section_type}";
       $values = \Drupal::typedDataManager()->getDefinition($data_type);
       $definition = new static(is_array($values) ? $values : []);
       $definition->setDataType($data_type);
-      $definition->setObjectType($object_type);
+      $definition->setSectionType($section_type);
       return $definition;
     }
     return new static([]);
@@ -30,8 +31,8 @@ class DocumentObjectDataDefinition extends MapDataDefinition {
    */
   public static function createFromDataType($data_type) {
     $parts = explode(':', $data_type);
-    if ($parts[0] != 'document_object') {
-      throw new \InvalidArgumentException('Data type must be in the form of "document_object:OBJECT_TYPE".');
+    if ($parts[0] != 'section') {
+      throw new \InvalidArgumentException('Data type must be in the form of "section:SECTION_TYPE".');
     }
     return static::create(
       isset($parts[1]) ? $parts[1] : NULL
@@ -39,22 +40,22 @@ class DocumentObjectDataDefinition extends MapDataDefinition {
   }
 
   /**
-   * Sets the ObjectType constraint.
+   * Sets the SectionType constraint.
    *
-   * @param string $object_type
-   * @return \Drupal\ckeditor5_sections\TypedData\DocumentObjectDataDefinition
+   * @param string $section_type
+   * @return \Drupal\ckeditor5_sections\TypedData\DocumentSectionDataDefinition
    */
-  public function setObjectType($object_type) {
-    return $this->addConstraint('ObjectType', $object_type);
+  public function setSectionType($section_type) {
+    return $this->addConstraint('SectionType', $section_type);
   }
 
   /**
-   * Returns the current ObjectType constraint.
+   * Returns the current SectionType constraint.
    *
    * @return string|NULL
    */
-  public function getObjectType() {
-    return isset($this->definition['constraints']['ObjectType']) ? $this->definition['constraints']['ObjectType'] : NULL;
+  public function getSectionType() {
+    return isset($this->definition['constraints']['SectionType']) ? $this->definition['constraints']['SectionType'] : NULL;
   }
 
   /**
@@ -63,16 +64,22 @@ class DocumentObjectDataDefinition extends MapDataDefinition {
   public function getPropertyDefinitions() {
     if (!isset($this->propertyDefinitions)) {
       $this->propertyDefinitions = [];
-      if ($object_type = $this->getObjectType()) {
+      if ($section_type = $this->getSectionType()) {
         $templates = $this->getAvailableTemplates();
-        $object_types = [];
+        $section_types = [];
         foreach ($templates as $template) {
-          $object_types = array_merge($object_types, $this->getObjectsDefinitionFromTemplate($template['template']));
+          $section_types = array_merge($section_types, $this->getSectionsDefinitionFromTemplate($template['template']));
         }
-        if (!empty($object_types[$object_type])) {
-          foreach ($object_types[$object_type]['fields'] as $field_name => $field) {
-            $this->propertyDefinitions[$field_name] = DataDefinition::create($field['type'])
-              ->setLabel($field['label']);
+        if (!empty($section_types[$section_type])) {
+          foreach ($section_types[$section_type]['fields'] as $field_name => $field) {
+            if (!empty($field['cardinality']) && $field['cardinality'] === 'multiple') {
+              $this->propertyDefinitions[$field_name] = ListDataDefinition::create($field['type'])
+                ->setLabel($field['label']);
+            }
+            else {
+              $this->propertyDefinitions[$field_name] = DataDefinition::create($field['type'])
+                ->setLabel($field['label']);
+            }
           }
         }
       }
@@ -91,16 +98,16 @@ class DocumentObjectDataDefinition extends MapDataDefinition {
   }
 
   /**
-   * Extracts the object definitions (fields and possibly other metadata) from
+   * Extracts the sections definitions (fields and possibly other metadata) from
    * a template.
    *
    * @param string $template
    * @return array
    */
-  protected function getObjectsDefinitionFromTemplate($template) {
+  protected function getSectionsDefinitionFromTemplate($template) {
     // @todo: Properly implement this method.
     return[
-      'document_object:teaser' => [
+      'section:teaser' => [
         'fields' => [
           'layout' => [
             'label' => 'layout',
@@ -108,7 +115,7 @@ class DocumentObjectDataDefinition extends MapDataDefinition {
           ],
           'image' => [
             'label' => 'image',
-            'type' => 'document_object:image',
+            'type' => 'section:image',
           ],
           'headline' => [
             'label' => 'headline',
@@ -120,7 +127,7 @@ class DocumentObjectDataDefinition extends MapDataDefinition {
           ],
           'link' => [
             'label' => 'link',
-            'type' => 'document_object:button'
+            'type' => 'section:button'
           ],
           'content' => [
             'label' => 'content',
@@ -128,7 +135,7 @@ class DocumentObjectDataDefinition extends MapDataDefinition {
           ]
         ],
       ],
-      'document_object:image' => [
+      'section:image' => [
         'fields' => [
           'mediaType' => [
             'label' => 'mediaType',
@@ -144,7 +151,7 @@ class DocumentObjectDataDefinition extends MapDataDefinition {
           ]
         ],
       ],
-      'document_object:button' => [
+      'section:button' => [
         'fields' => [
           'content' => [
             'label' => 'content',

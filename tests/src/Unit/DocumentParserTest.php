@@ -11,12 +11,12 @@ use Drupal\Tests\UnitTestCase;
 class DocumentParserTest extends UnitTestCase {
 
   /**
-   * @covers \Drupal\ckeditor5_sections\DocumentParser::extractObjectDefinitions
+   * @covers \Drupal\ckeditor5_sections\DocumentParser::extractSectionDefinitions
    * @dataProvider extractObjectDefinitionsProvider
    */
   public function testExtractObjectDefinitions($template, $result) {
     $documentParser = new DocumentParser();
-    $this->assertArrayEquals($result, $documentParser->extractObjectDefinitions($template));
+    $this->assertArrayEquals($result, $documentParser->extractSectionDefinitions($template));
   }
 
   /**
@@ -44,6 +44,8 @@ class DocumentParserTest extends UnitTestCase {
          class="teaser__text"
     >Teaser content placeholder
     </div>
+    <div itemprop="links" ck-type="container" ck-contains="button">
+    </div>
     <a ck-type="button"
        itemtype="button"
        itemprop="link"
@@ -53,7 +55,7 @@ class DocumentParserTest extends UnitTestCase {
 </div>
 XML,
         [
-          'document_object:teaser' => [
+          'section:teaser' => [
             'fields' => [
               'layout' => [
                 'label' => 'layout',
@@ -61,7 +63,7 @@ XML,
               ],
               'image' => [
                 'label' => 'image',
-                'type' => 'document_object:image',
+                'type' => 'section:image',
               ],
               'headline' => [
                 'label' => 'headline',
@@ -71,9 +73,14 @@ XML,
                 'label' => 'text',
                 'type' => 'string'
               ],
+              'links' => [
+                'label' => 'links',
+                'type' => 'section',
+                'cardinality' => 'multiple',
+              ],
               'link' => [
                 'label' => 'link',
-                'type' => 'document_object:button'
+                'type' => 'section:button'
               ],
               'content' => [
                 'label' => 'content',
@@ -81,7 +88,7 @@ XML,
               ]
             ],
           ],
-          'document_object:image' => [
+          'section:image' => [
             'fields' => [
               'mediaType' => [
                 'label' => 'mediaType',
@@ -97,7 +104,7 @@ XML,
               ]
             ],
           ],
-          'document_object:button' => [
+          'section:button' => [
             'fields' => [
               'content' => [
                 'label' => 'content',

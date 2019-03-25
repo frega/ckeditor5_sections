@@ -2,10 +2,10 @@
 
 namespace Drupal\ckeditor5_sections\TypedData;
 
-interface DocumentObjectTypeInterface {
+interface DocumentSectionTypeInterface {
 
   /**
-   * Returns the type of the object.
+   * Returns the type of the section.
    *
    * @return string
    */
