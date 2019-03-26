@@ -35,6 +35,8 @@ import '@amazee/editor-components/components/text_conflict/text_conflict_option/
 
 import '@amazee/editor-components/components/textfield/textfield';
 import '@amazee/editor-components/components/button/button';
+import '@amazee/editor-components/components/media_conflict/media_conflict';
+import '@amazee/editor-components/components/media_conflict/media_conflict_option/media_conflict_option';
 
 export default class SectionsEditor extends BalloonEditorBase { }
 
