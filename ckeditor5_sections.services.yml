@@ -8,3 +8,7 @@ services:
     arguments: ['@config.factory']
   ckeditor5_sections.document_parser:
     class: Drupal\ckeditor5_sections\DocumentParser
+  ckeditor5_sections.normalizer.document_section:
+    class: Drupal\ckeditor5_sections\Normalizer\DocumentSectionNormalizer
+    tags:
+    - { name: normalizer, priority: 50 }

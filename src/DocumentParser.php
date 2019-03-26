@@ -2,7 +2,7 @@
 
 namespace Drupal\ckeditor5_sections;
 
-use Drupal\ckeditor5_sections\Plugin\DataType\DocumentSection;
+use Drupal\ckeditor5_sections\Plugin\DataType\DocumentSectionAdapter;
 use Drupal\Core\TypedData\ComplexDataDefinitionInterface;
 use Drupal\Core\TypedData\ComplexDataInterface;
 use Drupal\Core\TypedData\ListDataDefinitionInterface;
@@ -54,8 +54,9 @@ class DocumentParser implements DocumentParserInterface {
   public function extractSectionData($document) {
     $dom = new \DOMDocument();
     $dom->loadHTML(mb_convert_encoding($document, 'HTML-ENTITIES', 'UTF-8'), LIBXML_NOERROR);
-    $list_definition = \Drupal::typedDataManager()->createListDataDefinition('section');
-    $result = \Drupal::typedDataManager()->create($list_definition);
+    //$list_definition = \Drupal::typedDataManager()->createListDataDefinition('section');
+    //$result = \Drupal::typedDataManager()->create($list_definition);
+    $result = [];
     $this->buildSectionData($dom, $result);
     return $result;
   }
@@ -149,7 +150,111 @@ class DocumentParser implements DocumentParserInterface {
     }
   }
 
-  public function buildSectionData(\DOMNode $node, ListInterface $result, ComplexDataInterface $parent = NULL) {
+  public function buildSectionData(\DOMNode $node, array &$result, DocumentSection $parent = NULL) {
+    $new_parent = $parent;
+    if ($node instanceof \DOMElement) {
+      $value = [
+        'item_type' => NULL,
+        'item_cardinality' => 'single',
+      ];
+      // If the element has an itemprop attribute, and we are in the context of
+      // a parent, then we extract the item type and its cardinality from the
+      // data definition we have in the system. If the element has an itemprop,
+      // but we are not in the context of a parent then we can't say what type
+      // is, unless it has an itemtype attribute.
+      if ($node->hasAttribute('itemprop') && !empty($parent)) {
+        $parent_type = $parent->getType();
+        $field_name = $node->getAttribute('itemprop');
+        $value['field_name'] = $field_name;
+        /* @var \Drupal\Core\TypedData\ComplexDataDefinitionInterface $data_definition */
+        $data_definition = \Drupal::typedDataManager()->createDataDefinition($parent_type);
+        $field_definition = $data_definition->getPropertyDefinition($field_name);
+        // @todo: throw an exception maybe?
+        if (!empty($field_definition)) {
+          $value['item_type'] = $field_definition->getDataType();
+          // If the field data definition is an instance of ListDataDefinition,
+          // then the cardinality is multiple, and its type is section.
+          if ($field_definition instanceof ListDataDefinitionInterface) {
+            $value['item_cardinality'] = 'multiple';
+            $value['item_type'] = 'section';
+          }
+        }
+      }
+      elseif ($node->hasAttribute('itemtype')) {
+        $value['item_type'] = $node->getAttribute('itemtype');
+      }
+
+      // We only process the actual item if we could extract the item type.
+      if (!empty($value['item_type'])) {
+        if ($value['item_cardinality'] === 'multiple') {
+          if (!empty($parent) && !empty($value['field_name'])) {
+            $field_result = [];
+            if ($node->hasChildNodes()) {
+              foreach (iterator_to_array($node->childNodes) as $child) {
+                $this->buildSectionData($child, $field_result);
+              }
+            }
+            $parent->set($value['field_name'], $field_result);
+          }
+          $stop_processing = TRUE;
+        }
+        else {
+          $item_field_definition = \Drupal::typedDataManager()->createDataDefinition($value['item_type']);
+          // If the field is a complex field, then we need to additionally check
+          // the values of the attributes.
+          if ($item_field_definition instanceof ComplexDataDefinitionInterface) {
+            $item_field_data = new DocumentSection($value['item_type']);
+            // Add all the attributes.
+            foreach ($node->attributes as $attribute) {
+              $attributeName = $attribute->nodeName;
+              // Make sure that the 'data-*' attributes are properly converted to
+              // camel case.
+              if (strpos($attributeName, 'data-') === 0) {
+                $attributeName = $this->convertDataAttributeName($attributeName);
+              }
+              // Add the attribute to the current value.
+              if ($item_field_definition->getPropertyDefinition($attributeName)) {
+                $item_field_data->set($attributeName, $node->getAttribute($attribute->nodeName));
+              }
+            }
+            $item_field_data->set('content', $this->getDOMInnerHtml($node));
+            $new_parent = $item_field_data;
+          }
+          else {
+            // If the field is just a simple (scalar) field, then we just dump
+            // the entire html of th node in it for now.
+            $item_field_data = $this->getDOMInnerHtml($node);
+          }
+
+          // If we are in the context of a parent, then just set the item data
+          // to the proper field name.
+          if (!empty($parent)) {
+            if (!empty($value['field_name'])) {
+              $parent->set($value['field_name'], $item_field_data);
+            }
+          }
+          // If we are not in the context of a parent, we just append the data
+          // to the result array.
+          else {
+            $result[] = $item_field_data;
+          }
+        }
+      }
+    }
+    // Process all the children of the current node, if any.
+    if (!$stop_processing && $node->hasChildNodes()) {
+      foreach (iterator_to_array($node->childNodes) as $child) {
+        $this->buildSectionData($child, $result, $new_parent);
+      }
+    }
+  }
+
+  // @todo: this is an initial implementation which uses the typed data, but this
+  // did not work properly when having lists of items. So for now we just use
+  // the above implementation which uses the typed data information to retrieve
+  // the metadata about the fields, but the values themselves are stored in
+  // DocumentSection objects.
+  public function __buildSectionData(\DOMNode $node, ListInterface $result, DocumentSectionAdapter $parent = NULL) {
     $new_result = $result;
     $new_parent = $parent;
     $update_new_result = FALSE;
@@ -165,7 +270,7 @@ class DocumentParser implements DocumentParserInterface {
       // but we are not in the context of a parent then we can't say what type
       // is, unless it has an itemtype attribute.
       if ($node->hasAttribute('itemprop') && !empty($parent)) {
-        $parent_type = $parent->getDataDefinition()->getDataType();
+        $parent_type = $parent->get('section_type')->getValue();
         $field_name = $node->getAttribute('itemprop');
         $value['field_name'] = $field_name;
         /* @var \Drupal\Core\TypedData\ComplexDataDefinitionInterface $data_definition */
@@ -173,12 +278,13 @@ class DocumentParser implements DocumentParserInterface {
         $field_definition = $data_definition->getPropertyDefinition($field_name);
         // @todo: throw an exception maybe?
         if (!empty($field_definition)) {
+          $value['item_type'] = $field_definition->getDataType();
           // If the field data definition is an instance of ListDataDefinition,
-          // then the cardinality is multiple.
+          // then the cardinality is multiple, and its type is section.
           if ($field_definition instanceof ListDataDefinitionInterface) {
             $value['item_cardinality'] = 'multiple';
+            $value['item_type'] = 'section';
           }
-          $value['item_type'] = $field_definition->getDataType();
         }
       }
       elseif ($node->hasAttribute('itemtype')) {
@@ -190,7 +296,6 @@ class DocumentParser implements DocumentParserInterface {
         if ($value['item_cardinality'] === 'multiple') {
           $item_field_definition = \Drupal::typedDataManager()->createListDataDefinition($value['item_type']);
           $item_field_data = \Drupal::typedDataManager()->create($item_field_definition);
-          //$new_result = $item_field_data;
           $update_new_result = TRUE;
         }
         else {
@@ -214,7 +319,7 @@ class DocumentParser implements DocumentParserInterface {
               }
             }
             $item_field_data->set('content', $this->getDOMInnerHtml($node));
-            //$new_parent = $item_field_data;
+            $item_field_data->set('section_type', $value['item_type']);
             $update_new_parent = TRUE;
           }
           else {
@@ -240,11 +345,7 @@ class DocumentParser implements DocumentParserInterface {
         // to the result array.
         else {
           $appended_item = $result->appendItem($item_field_data->getValue());
-          // Hack to make sure we preserve the data type, because the data
-          // definition for the lists will only be 'section'
-          //$appended_item->getDataDefinition()->
-          $appended_item->getDataDefinition()->setDataType($item_field_data->getDataDefinition()->getDataType());
-          $appended_item->getDataDefinition()->setSectionType('teaser');
+          $appended_item->getDataDefinition()->setSectionType($item_field_data->getDataDefinition()->getConstraint('SectionType'));
           if ($update_new_result) {
             $new_result = $appended_item;
           }

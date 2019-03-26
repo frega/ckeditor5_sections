@@ -15,6 +15,6 @@ use Drupal\Core\TypedData\Plugin\DataType\Map;
  *   definition_class = "\Drupal\ckeditor5_sections\TypedData\DocumentSectionDataDefinition"
  * )
  */
-class DocumentSection extends Map {
+class DocumentSectionAdapter extends Map {
 
 }

@@ -2,8 +2,6 @@
 
 namespace Drupal\ckeditor5_sections\TypedData;
 
-use Drupal\Core\TypedData\DataDefinition;
-use Drupal\Core\TypedData\ListDataDefinition;
 use Drupal\Core\TypedData\MapDataDefinition;
 
 /**
@@ -21,7 +19,7 @@ class DocumentSectionDataDefinition extends MapDataDefinition {
     }
     $values = \Drupal::typedDataManager()->getDefinition($data_type);
     $definition = new static(is_array($values) ? $values : []);
-    $definition->setDataType($data_type);
+    //$definition->setDataType($data_type);
     if (!empty($section_type)) {
       $definition->setSectionType($section_type);
     }
@@ -63,23 +61,36 @@ class DocumentSectionDataDefinition extends MapDataDefinition {
   /**
    * {@inheritdoc}
    */
+  public function getDataType() {
+    $data_type = 'section';
+    if ($section_type = $this->getSectionType()) {
+      $data_type .= ':' . $section_type;
+    }
+    return $data_type;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getPropertyDefinitions() {
     if (!isset($this->propertyDefinitions)) {
+      $this->propertyDefinitions = [];
       if ($section_type = $this->getSectionType()) {
-        $this->propertyDefinitions = [];
         $templates = $this->getAvailableTemplates();
         $section_types = [];
         foreach ($templates as $template) {
           $section_types = array_merge($section_types, $this->getSectionDefinitionsFromTemplate($template['template']));
         }
         if (!empty($section_types[$section_type])) {
+          $this->propertyDefinitions['section_type'] = \Drupal::typedDataManager()->createDataDefinition('string')
+            ->setLabel('Type');
           foreach ($section_types[$section_type]['fields'] as $field_name => $field) {
             if (!empty($field['cardinality']) && $field['cardinality'] === 'multiple') {
-              $this->propertyDefinitions[$field_name] = ListDataDefinition::create($field['type'])
+              $this->propertyDefinitions[$field_name] =  \Drupal::typedDataManager()->createListDataDefinition($field['type'])
                 ->setLabel($field['label']);
             }
             else {
-              $this->propertyDefinitions[$field_name] = DataDefinition::create($field['type'])
+              $this->propertyDefinitions[$field_name] = \Drupal::typedDataManager()->createDataDefinition($field['type'])
                 ->setLabel($field['label']);
             }
           }
