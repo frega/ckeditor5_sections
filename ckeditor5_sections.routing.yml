@@ -11,3 +11,17 @@ ckeditor5_sections.media.preview:
   requirements:
     # TODO: proper access handling
     _permission: 'access content'
+
+ckeditor5_sections.content.preview:
+  path: '/sections/content-preview/{uuid}/{display}'
+  defaults:
+    _controller: '\Drupal\ckeditor5_sections\Controller\ContentPreviewController::preview'
+  options:
+    parameters:
+      media:
+        type: entity:node
+      display:
+        type: string
+  requirements:
+    # TODO: proper access handling
+    _permission: 'access content'

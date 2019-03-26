@@ -41,7 +41,7 @@ class CKEditor5SectionsMediaLibrarySelectForm extends MediaLibrarySelectForm {
           '@label' => $entity->label(),
         ]),
         '#title_display' => 'invisible',
-        '#return_value' => $return_type == 'uuid' ? $entity->uuid(): $entity->id(),
+        '#return_value' => $return_type == 'uuid' ? $entity->uuid() : $entity->id(),
       ];
       if ($return_type == 'uuid') {
         $form[$this->options['id']][$row_index]['#type'] = 'radio';
@@ -65,7 +65,7 @@ class CKEditor5SectionsMediaLibrarySelectForm extends MediaLibrarySelectForm {
       'callback' => [static::class, 'updateWidget'],
     ];
 
-    $form['actions']['submit']['#value'] = $this->t('Select media');
+    $form['actions']['submit']['#value'] = $this->t('Select entity');
     $form['actions']['submit']['#field_id'] = $this->options['id'];
     $form['actions']['submit_modal'] = $form['actions']['submit'];
     unset($form['actions']['submit']);
