@@ -137,6 +137,32 @@
         });
         AjaxDialog.execute();
       } },
+      drupalEntitySelector: { callback: (type, operation, callback) => {
+        currentCallback = callback;
+
+         // Filter allowed node types.
+        var typeFilter = '';
+        if (typeof type != 'undefined') {
+          var types = type.split(' ');
+          types.forEach((item) => {
+            typeFilter += '&content_library_allowed_types[' + item + ']=' + item;
+          });
+        }
+
+        Drupal.ajax({
+          url: Drupal.url('admin/content/content-widget?media_library_widget_id=' + $(element).attr('id') + typeFilter + '&return_type=uuid' ),
+          dialogType: 'modal',
+          dialog: {
+            dialogClass: 'media-library-widget-modal',
+            heigh: '75%',
+            width: '75%',
+            title: 'Content library',
+          }
+        }).execute();
+      }},
+      drupalEntityPreview: { callback: (uuid, display, callback) => {
+        $.ajax('/sections/content-preview/' + uuid + '/' + display || 'default' ).done(callback);
+      }}
     });
   }
 }(jQuery, Drupal));

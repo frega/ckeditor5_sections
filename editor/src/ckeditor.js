@@ -32,6 +32,7 @@ import '@amazee/editor-components/components/gallery/gallery';
 import '@amazee/editor-components/components/tabs/tabs';
 import '@amazee/editor-components/components/text_conflict/text_conflict';
 import '@amazee/editor-components/components/text_conflict/text_conflict_option/text_conflict_option';
+
 import '@amazee/editor-components/components/textfield/textfield';
 import '@amazee/editor-components/components/button/button';
 import '@amazee/editor-components/components/media_conflict/media_conflict';
@@ -45,6 +46,8 @@ class PlaceholderConfig extends Plugin {
 		Placeholder.availableSections = Object.keys(templates)
 			.map(id => ({ id, label: templates[id].label, icon: templates[id].icon }));
 		Media.previewCallback = this.editor.config.get('drupalMediaRenderer').callback;
+    Media.previewEntityCallback = this.editor.config.get('drupalEntityPreview').callback;
+    Media.drupalEntitySelector = this.editor.config.get('drupalEntitySelector').callback;
 	}
 }
 
