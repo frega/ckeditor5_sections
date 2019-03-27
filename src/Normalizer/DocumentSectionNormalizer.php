@@ -7,8 +7,7 @@ use Drupal\serialization\Normalizer\NormalizerBase;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 
 /**
- * Class DocumentSectionNormalizer
- * @package Drupal\ckeditor5_sections\Plugin\Normalizer
+ * Normalizer class for document section objects.
  */
 class DocumentSectionNormalizer extends NormalizerBase implements DenormalizerInterface {
 
