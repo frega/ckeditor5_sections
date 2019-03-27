@@ -2,13 +2,12 @@
 
 namespace Drupal\ckeditor5_sections\Plugin\Editor;
 
+use Drupal\ckeditor5_sections\SectionsCollectorInterface;
 use Drupal\Component\Plugin\Exception\PluginNotFoundException;
 use Drupal\Component\Utility\NestedArray;
-use Drupal\Core\Asset\LibraryDiscoveryInterface;
 use Drupal\Core\Cache\CacheBackendInterface;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\Extension\ModuleHandlerInterface;
-use Drupal\ckeditor\CKEditorPluginManager;
 use Drupal\Core\Form\FormStateInterface;
 use Drupal\Core\Language\LanguageManagerInterface;
 use Drupal\Core\Render\RendererInterface;
@@ -77,6 +76,11 @@ class CKEditor5Sections extends EditorBase implements ContainerFactoryPluginInte
   protected $cache;
 
   /**
+   * @var \Drupal\ckeditor5_sections\SectionsCollectorInterface
+   */
+  protected $sectionsCollector;
+
+  /**
    * Constructs a \Drupal\ckeditor\Plugin\Editor\CKEditor object.
    *
    * @param array $configuration
@@ -106,13 +110,15 @@ class CKEditor5Sections extends EditorBase implements ContainerFactoryPluginInte
     LanguageManagerInterface $language_manager,
     RendererInterface $renderer,
     CacheBackendInterface $cacheBackend,
-    EntityTypeManagerInterface $entityTypeManager
+    EntityTypeManagerInterface $entityTypeManager,
+    SectionsCollectorInterface $sections_collector
   ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->moduleHandler = $module_handler;
     $this->languageManager = $language_manager;
     $this->renderer = $renderer;
     $this->cache = $cacheBackend;
+    $this->sectionsCollector = $sections_collector;
     try {
       $this->linkitProfileStorage = $entityTypeManager->getStorage('linkit_profile');
     } catch (PluginNotFoundException $exc) {
@@ -133,7 +139,7 @@ class CKEditor5Sections extends EditorBase implements ContainerFactoryPluginInte
       $container->get('renderer'),
       $container->get('cache.config'),
       $container->get('entity_type.manager'),
-      $container->get('library.discovery')
+      $container->get('ckeditor5_sections.sections_collector')
     );
   }
 
@@ -161,7 +167,7 @@ class CKEditor5Sections extends EditorBase implements ContainerFactoryPluginInte
   public function settingsForm(array $form, FormStateInterface $form_state, Editor $editor) {
     $settings = $editor->getSettings();
     $templateDirectory = $form_state->getValue(['editor','settings', 'templateDirectory'], $settings['templateDirectory']);
-    $sections = $this->collectSections($templateDirectory);
+    $sections = $this->sectionsCollector->collectSections($templateDirectory);
 
     $form['templateDirectory'] = [
       '#type' => 'textfield',
@@ -286,7 +292,7 @@ class CKEditor5Sections extends EditorBase implements ContainerFactoryPluginInte
    */
   public function getJSSettings(Editor $editor) {
     $settings = $editor->getSettings();
-    $sections = $this->collectSections($settings['templateDirectory']);
+    $sections = $this->sectionsCollector->collectSections($settings['templateDirectory']);
     $enabledSections = array_filter(array_values($settings['enabledSections']));
     $rootElement = $settings['rootElement'];
 
@@ -313,28 +319,6 @@ class CKEditor5Sections extends EditorBase implements ContainerFactoryPluginInte
     $moduleHandler->alter('ckeditor5_sections_editor_settings', $settings);
 
     return $settings;
-  }
-
-  /**
-   * Returns a list of all available sections.
-   *
-   * @param string $directory
-   *   The directory path to scan for templates.
-   *
-   * @return array
-   */
-  protected function collectSections($directory) {
-    $files = file_scan_directory($directory, '/.*.yml/');
-    $sections = [];
-    foreach ($files as $file => $fileInfo) {
-      $info = \Symfony\Component\Yaml\Yaml::parseFile($file);
-      $sections[$fileInfo->name] = [
-        'label' => array_key_exists('label', $info) ? $info['label'] : $fileInfo->name,
-        'icon' => array_key_exists('icon', $info) ? $info['icon'] : 'text',
-        'template' => file_get_contents(dirname($fileInfo->uri) . '/' . $fileInfo->name . '.html'),
-      ];
-    }
-    return $sections;
   }
 
   /**
