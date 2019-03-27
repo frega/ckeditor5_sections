@@ -11,4 +11,8 @@
 function ckeditor5_sections_views_data_alter(&$data) {
   // Use custom media select plugin.
   $data['media']['media_library_select_form']['field']['id'] = 'sections_media_library_select_form';
+
+  $data['node_field_data']['node_library_select_form'] = $data['media']['media_library_select_form'];
+  $data['node_field_data']['node_library_select_form']['title'] = t('Select Node');
+  $data['node_field_data']['node_library_select_form']['real field'] = 'nid';
 }
