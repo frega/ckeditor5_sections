@@ -150,7 +150,7 @@ class DocumentParser implements DocumentParserInterface {
     }
   }
 
-  public function buildSectionData(\DOMNode $node, array &$result, DocumentSection $parent = NULL) {
+  public function buildSectionData(\DOMNode $node, array &$sections_list, DocumentSection $parent = NULL) {
     $new_parent = $parent;
     if ($node instanceof \DOMElement) {
       $value = [
@@ -186,6 +186,9 @@ class DocumentParser implements DocumentParserInterface {
 
       // We only process the actual item if we could extract the item type.
       if (!empty($value['item_type'])) {
+        // If we encounter a multiple field, then this is actually just a list
+        // of items. In this case we directly extract the list and assign it to
+        // the field.
         if ($value['item_cardinality'] === 'multiple') {
           if (!empty($parent) && !empty($value['field_name'])) {
             $field_result = [];
@@ -196,6 +199,8 @@ class DocumentParser implements DocumentParserInterface {
             }
             $parent->set($value['field_name'], $field_result);
           }
+          // As we already processed the list, we set this flag to true so this
+          // does not get processed again.
           $stop_processing = TRUE;
         }
         else {
@@ -222,7 +227,7 @@ class DocumentParser implements DocumentParserInterface {
           }
           else {
             // If the field is just a simple (scalar) field, then we just dump
-            // the entire html of th node in it for now.
+            // the entire html of the node in it for now.
             $item_field_data = $this->getDOMInnerHtml($node);
           }
 
@@ -236,7 +241,7 @@ class DocumentParser implements DocumentParserInterface {
           // If we are not in the context of a parent, we just append the data
           // to the result array.
           else {
-            $result[] = $item_field_data;
+            $sections_list[] = $item_field_data;
           }
         }
       }
@@ -244,7 +249,7 @@ class DocumentParser implements DocumentParserInterface {
     // Process all the children of the current node, if any.
     if (!$stop_processing && $node->hasChildNodes()) {
       foreach (iterator_to_array($node->childNodes) as $child) {
-        $this->buildSectionData($child, $result, $new_parent);
+        $this->buildSectionData($child, $sections_list, $new_parent);
       }
     }
   }
