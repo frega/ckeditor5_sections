@@ -107,7 +107,7 @@ class DocumentSectionDataDefinition extends MapDataDefinition {
    *  An array of all the available sections.
    */
   protected function getAvailableTemplates() {
-    return \Drupal::getContainer()->get('ckeditor5_sections.sections_collector')->collectSections();
+    return \Drupal::service('ckeditor5_sections.sections_collector')->getSections();
   }
 
   /**

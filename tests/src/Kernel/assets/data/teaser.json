@@ -1,0 +1,11 @@
+{
+  "__type": "teaser",
+  "headline": "Title",
+  "layout": "test",
+  "text": "<p>This is the content.</p>",
+  "image": {
+    "__type": "image",
+    "mediaType": "image",
+    "mediaUuid": "123"
+  }
+}

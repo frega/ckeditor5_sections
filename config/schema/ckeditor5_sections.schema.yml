@@ -1,0 +1,32 @@
+# Schema for the configuration files of the CKEditor module.
+
+editor.settings.ckeditor5_sections:
+  type: mapping
+  label: 'CKEditor5 Sections settings'
+  mapping:
+    templateDirectory:
+      type: string
+      label: 'Template directory'
+    rootElement:
+      type: string
+      label: 'Root element'
+    editorBuild:
+      type: string
+      label: 'Root element'
+    enabledSections:
+      type: sequence
+      label: 'Enabled sections'
+      sequence:
+        type: integer
+    plugins:
+      type: mapping
+      label: 'Plugins'
+      mapping:
+        drupallink:
+          type: mapping
+          label: 'Drupal link configuration'
+          mapping:
+            linkit_enabled:
+              type: integer
+            linkit_profile:
+              type: string

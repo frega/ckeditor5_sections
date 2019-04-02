@@ -2,7 +2,7 @@
 
 namespace Drupal\ckeditor5_sections;
 
-use Drupal\Core\Config\ConfigFactory;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 
 /**
  * Sections collector service class.
@@ -10,27 +10,49 @@ use Drupal\Core\Config\ConfigFactory;
 class SectionsCollector implements SectionsCollectorInterface {
 
   /**
-   * The config factory service.
-   * @var \Drupal\Core\Config\ConfigFactory
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
    */
-  protected $configFactory;
+  protected $entityTypeManager;
 
   /**
    * SectionsCollector constructor.
-   * @param \Drupal\Core\Config\ConfigFactory $config_factory
+   *
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
    */
-  public function __construct(ConfigFactory $config_factory) {
-    $this->configFactory = $config_factory;
+  public function __construct(EntityTypeManagerInterface $entityTypeManager) {
+    $this->entityTypeManager = $entityTypeManager;
+  }
+
+  /**
+   * Returns an array with all the available templates from the system.
+   *
+   * @return array
+   *  An array of all the available sections.
+   */
+  public function getSections() {
+    /** @var \Drupal\Core\Config\Entity\ConfigEntityStorageInterface $storage */
+    $storage = $this->entityTypeManager->getStorage('editor');
+
+    /** @var Editor[] $editors */
+    $editors = $storage->loadByProperties([
+      'editor' => 'ckeditor5_sections',
+    ]);
+
+    /** @var \Drupal\ckeditor5_sections\SectionsCollectorInterface $collector */
+    $templates = [];
+    foreach($editors as $editor) {
+      $templates = array_merge($templates, $this->collectSectionsFromDirectory($editor->getSettings()['templateDirectory']));
+    }
+
+    return $templates;
   }
 
   /**
    * {@inheritdoc}
    */
-  public function collectSections($directory = NULL) {
-    if (empty($directory)) {
-      // @todo: this needs to be changed so that it will check all the editors
-      // which have the ckeditor5_sections plugin enabled.
-      $directory = $this->configFactory->get('editor.editor.sections')->get('settings.templateDirectory');
+  protected function collectSectionsFromDirectory($directory) {
+    if ($directory === '') {
+      $directory = drupal_get_path('module', 'ckeditor5_sections') . '/sections';
     }
     $files = file_scan_directory($directory, '/.*.yml/');
     $sections = [];

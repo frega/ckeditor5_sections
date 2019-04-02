@@ -38,4 +38,17 @@ class DocumentSection implements DocumentSectionInterface {
   public function getFields() {
     return $this->fields;
   }
+
+  /**
+   * Turn a document section into its simple php array representation.
+   */
+  public function getValue() {
+    $value = [
+      '__type' => substr($this->sectionType, strlen('section:')),
+    ];
+    foreach ($this->fields as $key => $field) {
+      $value[$key] = $field instanceof DocumentSection ? $field->getValue() : $field;
+    }
+    return $value;
+  }
 }
