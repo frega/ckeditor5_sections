@@ -6,8 +6,8 @@ services:
   ckeditor5_sections.sections_collector:
     class: Drupal\ckeditor5_sections\SectionsCollector
     arguments: ['@entity_type.manager']
-  ckeditor5_sections.document_parser:
-    class: Drupal\ckeditor5_sections\DocumentParser
+  ckeditor5_sections.document_converter:
+    class: Drupal\ckeditor5_sections\DocumentConverter
     arguments:
       - '@typed_data_manager'
       - '@ckeditor5_sections.sections_collector'

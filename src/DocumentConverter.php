@@ -12,7 +12,7 @@ use Drupal\Core\TypedData\TypedDataManagerInterface;
  * Parser class for extracting the section definitions and data from
  * templates and documents.
  */
-class DocumentParser implements DocumentParserInterface {
+class DocumentConverter implements DocumentParserInterface {
 
   /**
    * @var \Drupal\Core\TypedData\TypedDataManagerInterface
@@ -49,15 +49,55 @@ class DocumentParser implements DocumentParserInterface {
 
   public function buildDocument(DocumentSection $section) {
     $xml = new \DOMDocument();
-    $xml->appendChild($this->buildDocumentSection($section), $xml);
+    $xml->appendChild($this->buildDocumentSection($section, $xml));
     return $xml;
   }
 
   protected function buildDocumentSection(DocumentSection $section, \DOMDocument $doc) {
-    $node = $this->getTypeNode($section->getType());
-    $imported = $doc->importNode($node);
-    foreach ($node->attributes as $key => $value) {
-      
+    $node = $doc->importNode($this->getTypeNode(substr($section->getType(), strlen('section:'))), TRUE);
+    $this->processTemplateNode($section, $node, TRUE);
+    $doc->appendChild($node);
+    return $node;
+  }
+
+  protected function processTemplateNode(DocumentSection $section, \DOMElement $el, $current = FALSE) {
+    $fields = $section->getFields();
+    foreach ($el->attributes as $attributeName => $attribute) {
+      if (strpos($attributeName, 'ck-') === 0) {
+        $el->removeAttribute($attributeName);
+      }
+      if ($current) {
+        if (array_key_exists($attributeName, $fields)) {
+          $el->setAttribute($attributeName, $fields[$attributeName]);
+        }
+      }
+    }
+
+    if ($el->hasAttribute('itemprop')) {
+      if ($el->hasAttribute('itemtype')) {
+        $next = $section->get($el->getAttribute('itemprop'));
+        if ($next) {
+          $this->processTemplateNode($next, $el, TRUE);
+          return;
+        }
+      }
+      else {
+        $fragment = $el->ownerDocument->createDocumentFragment();
+        $fragment->appendXML('<div>' . $section->get($el->getAttribute('itemprop')) . '</div>');
+        foreach ($el->childNodes as $child) {
+          $el->removeChild($child);
+        }
+
+        foreach ($fragment->firstChild->childNodes as $child) {
+          $el->appendChild($child);
+        }
+      }
+    }
+
+    foreach ($el->childNodes as $child) {
+      if ($child instanceof \DOMElement) {
+        $this->processTemplateNode($section, $child);
+      }
     }
   }
 
@@ -156,11 +196,6 @@ class DocumentParser implements DocumentParserInterface {
           // well.
           if (strpos($attributeName, 'ck-') === 0) {
             continue;
-          }
-          // Make sure that the 'data-*' attributes are properly converted to
-          // camel case.
-          if (strpos($attributeName, 'data-') === 0) {
-            $attributeName = $this->convertDataAttributeName($attributeName);
           }
           // Add the attribute as a string field.
           $result[$type]['fields'][$attributeName] = [
@@ -262,11 +297,6 @@ class DocumentParser implements DocumentParserInterface {
             // Add all the attributes.
             foreach ($node->attributes as $attribute) {
               $attributeName = $attribute->nodeName;
-              // Make sure that the 'data-*' attributes are properly converted to
-              // camel case.
-              if (strpos($attributeName, 'data-') === 0) {
-                $attributeName = $this->convertDataAttributeName($attributeName);
-              }
               // Add the attribute to the current value.
               if ($item_field_definition->getPropertyDefinition($attributeName)) {
                 $item_field_data->set($attributeName, $node->getAttribute($attribute->nodeName));
@@ -362,11 +392,6 @@ class DocumentParser implements DocumentParserInterface {
             // Add all the attributes.
             foreach ($node->attributes as $attribute) {
               $attributeName = $attribute->nodeName;
-              // Make sure that the 'data-*' attributes are properly converted to
-              // camel case.
-              if (strpos($attributeName, 'data-') === 0) {
-                $attributeName = $this->convertDataAttributeName($attributeName);
-              }
               // Add the attribute to the current value.
               if ($item_field_definition->getPropertyDefinition($attributeName)) {
                 $item_field_data->set($attributeName, $node->getAttribute($attribute->nodeName));
@@ -414,32 +439,6 @@ class DocumentParser implements DocumentParserInterface {
         $this->buildSectionData($child, $new_result, $new_parent);
       }
     }
-  }
-
-  /**
-   * Converts a data attribute name to camel case, according to
-   * https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/dataset
-   *
-   * @param string $attributeName
-   *  The data attribute name
-   * @return string
-   *  The converted attribute name.
-   */
-  protected function convertDataAttributeName($attributeName) {
-    $convertedName = $attributeName;
-    // Remove first the 'data-' prefix. We assume that the attributeName starts
-    // with 'data-', so we directly remove the first 5 characters.
-    $convertedName = substr($convertedName, 5);
-    // Next, make each lowercase letter which follows a dash uppercase, and
-    // remove the dash.
-    $chrArray = preg_split('//u', $convertedName);
-    for ($i = 0; $i < count($chrArray) - 1; $i++) {
-      if ($chrArray[$i] === '-' && preg_match('/[a-z]/', $chrArray[$i+1])) {
-        $chrArray[$i+1] = mb_strtoupper($chrArray[$i+1]);
-        unset($chrArray[$i]);
-      }
-    }
-    return implode('', $chrArray);
   }
 
   /**

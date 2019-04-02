@@ -2,8 +2,8 @@
   "teaser": {
     "type": "teaser",
     "fields": {
-      "layout": {
-        "label": "layout",
+      "data-layout": {
+        "label": "data-layout",
         "type": "string"
       },
       "image": {
@@ -14,14 +14,9 @@
         "label": "headline",
         "type": "string"
       },
-      "content": {
-        "label": "content",
+      "text": {
+        "label": "text",
         "type": "string"
-      },
-      "links": {
-        "label": "links",
-        "type": "section",
-        "cardinality": "multiple"
       },
       "link": {
         "label": "link",
@@ -32,12 +27,12 @@
   "image": {
     "type": "image",
     "fields": {
-      "mediaType": {
-        "label": "mediaType",
+      "data-media-type": {
+        "label": "data-media-type",
         "type": "string"
       },
-      "mediaUuid": {
-        "label": "mediaUuid",
+      "data-media-uuid": {
+        "label": "data-media-uuid",
         "type": "string"
       }
     }
@@ -45,6 +40,14 @@
   "button": {
     "type": "button",
     "fields": {
+      "href": {
+        "label": "href",
+        "type": "string"
+      },
+      "text": {
+        "label": "text",
+        "type": "string"
+      }
     }
   }
 }

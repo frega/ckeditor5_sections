@@ -118,6 +118,6 @@ class DocumentSectionDataDefinition extends MapDataDefinition {
    * @return array
    */
   protected function getSectionDefinitionsFromTemplate($template) {
-    return \Drupal::getContainer()->get('ckeditor5_sections.document_parser')->extractSectionDefinitions($template);
+    return \Drupal::getContainer()->get('ckeditor5_sections.document_converter')->extractSectionDefinitions($template);
   }
 }

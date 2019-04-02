@@ -41,7 +41,7 @@ class DocumentSectionsExtractor extends TypedData {
     }
     else {
       /* @var \Drupal\ckeditor5_sections\DocumentParserInterface $parser */
-      $parser = \Drupal::service('ckeditor5_sections.document_parser');
+      $parser = \Drupal::service('ckeditor5_sections.document_converter');
       $this->sections = $parser->extractSectionData($text);;
     }
     return $this->sections;

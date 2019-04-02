@@ -8,7 +8,7 @@ use Drupal\KernelTests\KernelTestBase;
 /**
  * Tests for the Document parser class.
  */
-class DocumentParserTest extends KernelTestBase {
+class DocumentConverterTest extends KernelTestBase {
 
   public static $modules = [
     'ckeditor5_sections',
@@ -46,11 +46,11 @@ class DocumentParserTest extends KernelTestBase {
   }
 
   /**
-   * @covers \Drupal\ckeditor5_sections\DocumentParser::extractSectionDefinitions
+   * @covers \Drupal\ckeditor5_sections\DocumentConverter::extractSectionDefinitions
    * @dataProvider extractSectionDefinitionsProvider
    */
   public function testExtractSectionDefinitions($template, $result) {
-    $documentParser = $this->container->get('ckeditor5_sections.document_parser');
+    $documentParser = $this->container->get('ckeditor5_sections.document_converter');
     $this->assertEquals($result, $documentParser->extractSectionDefinitions($template));
   }
 
@@ -62,26 +62,26 @@ class DocumentParserTest extends KernelTestBase {
   }
 
   /**
-   * @covers \Drupal\ckeditor5_sections\DocumentParser::extractSectionData
+   * @covers \Drupal\ckeditor5_sections\DocumentConverter::extractSectionData
    * @dataProvider extractSectionDataProvider
    */
   public function testExtractSectionData($document, $result) {
     /** @var \Symfony\Component\Serializer\Normalizer\NormalizerInterface $normalizer */
     $normalizer = new DocumentSectionNormalizer();;
-    $documentParser = $this->container->get('ckeditor5_sections.document_parser');
+    $documentParser = $this->container->get('ckeditor5_sections.document_converter');
     /** @var \Drupal\ckeditor5_sections\DocumentSection $data */
     $data = $documentParser->extractSectionData($document)[0];
     $this->assertEquals($result, $normalizer->normalize($data, 'json'));
   }
 
   /**
-   * @covers \Drupal\ckeditor5_sections\DocumentParser::extractSectionData
+   * @covers \Drupal\ckeditor5_sections\DocumentConverter::extractSectionData
    * @dataProvider extractSectionDataProvider
    */
   public function testNormalization($document, $result) {
     /** @var \Symfony\Component\Serializer\Normalizer\NormalizerInterface $normalizer */
-    $normalizer = new DocumentSectionNormalizer();;
-    $documentParser = $this->container->get('ckeditor5_sections.document_parser');
+    $normalizer = new DocumentSectionNormalizer();
+    $documentParser = $this->container->get('ckeditor5_sections.document_converter');
     /** @var \Drupal\ckeditor5_sections\DocumentSection $data */
     $data = $documentParser->extractSectionData($document)[0];
     $this->assertEquals($data, $normalizer->denormalize($normalizer->normalize($data)));
@@ -91,4 +91,17 @@ class DocumentParserTest extends KernelTestBase {
     return $this->loadTestAssets('assets/data');
   }
 
+  /**
+   * @covers \Drupal\ckeditor5_sections\DocumentConverter::buildDocument
+   * @dataProvider extractSectionDataProvider
+   */
+  public function testBuildDocument($document, $data) {
+    /** @var \Drupal\ckeditor5_sections\DocumentConverter $documentParser */
+    $documentParser = $this->container->get('ckeditor5_sections.document_converter');
+    $normalizer = new DocumentSectionNormalizer();
+    $doc = $normalizer->denormalize($data);
+    $doc = $documentParser->buildDocument($doc);
+    $result = $doc->saveHTML();
+    $this->assertXmlStringEqualsXmlString($document, $result);
+  }
 }
