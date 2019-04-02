@@ -4,6 +4,7 @@ namespace Drupal\ckeditor5_sections\Normalizer;
 
 use Drupal\ckeditor5_sections\DocumentSection;
 use Drupal\serialization\Normalizer\NormalizerBase;
+use InvalidArgumentException;
 use Symfony\Component\Serializer\Normalizer\DenormalizerInterface;
 
 /**
@@ -13,37 +14,48 @@ class DocumentSectionNormalizer extends NormalizerBase implements DenormalizerIn
 
   protected $supportedInterfaceOrClass = 'Drupal\ckeditor5_sections\DocumentSection';
 
+  /**
+   * {@inheritdoc}
+   */
   public function normalize($object, $format = NULL, array $context = []) {
-    //$value = parent::normalize($object, $format, $context);
-    $value['section_type'] = $object->getType();
-    $value['fields'] = array_map(function($item) use ($format, $context) {
-      if ($item instanceof DocumentSection || is_array($item)) {
-        return $this->serializer->normalize($item, $format, $context);
+    $data['__type'] = substr($object->getType(), strlen('section:'));
+    foreach ($object->getFields() as $field => $value) {
+      if (is_array($value)) {
+        foreach ($value as $index => $item) {
+          $data[$field][$index] = $this->normalize($item, $format, $context);
+        }
       }
-      return $item;
-    }, $object->getFields());
-    return $value;
+      elseif ($value instanceof DocumentSection) {
+        $data[$field] = $this->normalize($value, $format, $context);
+      }
+      else {
+        $data[$field] = $value;
+      }
+    }
+    return $data;
   }
 
   /**
    * {@inheritdoc}
    */
   public function denormalize($data, $class = NULL, $format = NULL, array $context = []) {
-    if (is_array($data) && empty($data['section_type'])) {
+    if (is_array($data) && empty($data['__type'])) {
       return array_map(function ($item) use ($class, $format, $context) {
-        return $this->serializer->denormalize($item, $class, $format, $context);
+        return $this->denormalize($item, $class, $format, $context);
       }, $data);
-    } elseif (is_array($data) && !empty($data['section_type'])) {
-      $section = new DocumentSection($data['section_type']);
-      if (!empty($data['fields'])) {
-        foreach ($data['fields'] as $field_name => $field_value) {
-          if (is_array($field_value)) {
-            $section->set($field_name, $this->serializer->denormalize($field_value, $class, $format, $context));
-          }
-          else {
-            $section->set($field_name, $field_value);
-          }
+    } elseif (is_array($data) && !empty($data['__type'])) {
+      $section = new DocumentSection('section:' . $data['__type']);
+      foreach ($data as $field => $value) {
+        if ($field === '__type') {
+          continue;
         }
+        if (is_array($value)) {
+          $section->set($field, $this->denormalize($value, $class, $format, $context));
+        }
+        else {
+          $section->set($field, $value);
+        }
+
       }
       return $section;
     }

@@ -14,6 +14,8 @@ class SectionsCollector implements SectionsCollectorInterface {
    */
   protected $entityTypeManager;
 
+  protected $sections;
+
   /**
    * SectionsCollector constructor.
    *
@@ -30,21 +32,25 @@ class SectionsCollector implements SectionsCollectorInterface {
    *  An array of all the available sections.
    */
   public function getSections() {
-    /** @var \Drupal\Core\Config\Entity\ConfigEntityStorageInterface $storage */
-    $storage = $this->entityTypeManager->getStorage('editor');
+    if (!isset($this->sections)) {
 
-    /** @var Editor[] $editors */
-    $editors = $storage->loadByProperties([
-      'editor' => 'ckeditor5_sections',
-    ]);
+      /** @var \Drupal\Core\Config\Entity\ConfigEntityStorageInterface $storage */
+      $storage = $this->entityTypeManager->getStorage('editor');
 
-    /** @var \Drupal\ckeditor5_sections\SectionsCollectorInterface $collector */
-    $templates = [];
-    foreach($editors as $editor) {
-      $templates = array_merge($templates, $this->collectSectionsFromDirectory($editor->getSettings()['templateDirectory']));
+      /** @var Editor[] $editors */
+      $editors = $storage->loadByProperties([
+        'editor' => 'ckeditor5_sections',
+      ]);
+
+      /** @var \Drupal\ckeditor5_sections\SectionsCollectorInterface $collector */
+      $templates = [];
+      foreach($editors as $editor) {
+        $templates = array_merge($templates, $this->collectSectionsFromDirectory($editor->getSettings()['templateDirectory']));
+      }
+
+      $this->sections = $templates;
     }
-
-    return $templates;
+    return $this->sections;
   }
 
   /**

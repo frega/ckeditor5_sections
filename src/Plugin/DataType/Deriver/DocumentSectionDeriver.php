@@ -31,25 +31,9 @@ class DocumentSectionDeriver extends DeriverBase {
    * @return DocumentSection[]
    */
   protected function getSectionTypes() {
-    $templates = \Drupal::service('ckeditor5_sections.sections_collector')->getSections();
-    $section_types = [];
-    foreach ($templates as $template) {
-      $section_types = array_merge($section_types, $this->getSectionDefinitionsFromTemplate($template['template']));
-    }
+    $section_types = \Drupal::getContainer()->get('ckeditor5_sections.document_parser')->getSectionTypeDefinitions();
     return array_map(function($section) {
       return new DocumentSection($section['type']);
     }, $section_types);
-  }
-
-
-  /**
-   * Extracts the sections definitions (fields and possibly other metadata) from
-   * a template.
-   *
-   * @param string $template
-   * @return array
-   */
-  protected function getSectionDefinitionsFromTemplate($template) {
-    return \Drupal::getContainer()->get('ckeditor5_sections.document_parser')->extractSectionDefinitions($template);
   }
 }

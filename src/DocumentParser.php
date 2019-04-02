@@ -19,8 +19,46 @@ class DocumentParser implements DocumentParserInterface {
    */
   protected $typedDataManager;
 
-  public function __construct(TypedDataManagerInterface $typedDataManager) {
+  /**
+   * Maps type names to their template DOM nodes.
+   * @var \DOMElement[]
+   */
+  protected $typeNodeMap;
+
+  /**
+   * @var \Drupal\ckeditor5_sections\SectionsCollectorInterface
+   */
+  protected $sectionsCollector;
+
+  public function __construct(
+    TypedDataManagerInterface $typedDataManager,
+    SectionsCollectorInterface $sectionsCollector
+  ) {
+    $this->sectionsCollector = $sectionsCollector;
     $this->typedDataManager = $typedDataManager;
+  }
+
+  public function getSectionTypeDefinitions() {
+    $templates = $this->sectionsCollector->getSections();
+    $section_types = [];
+    foreach ($templates as $template) {
+      $section_types = array_merge($section_types, $this->extractSectionDefinitions($template['template']));
+    }
+    return $section_types;
+  }
+
+  public function buildDocument(DocumentSection $section) {
+    $xml = new \DOMDocument();
+    $xml->appendChild($this->buildDocumentSection($section), $xml);
+    return $xml;
+  }
+
+  protected function buildDocumentSection(DocumentSection $section, \DOMDocument $doc) {
+    $node = $this->getTypeNode($section->getType());
+    $imported = $doc->importNode($node);
+    foreach ($node->attributes as $key => $value) {
+      
+    }
   }
 
   /**
@@ -54,6 +92,19 @@ class DocumentParser implements DocumentParserInterface {
   }
 
   /**
+   * @param $type
+   *
+   * @return \DOMElement
+   */
+  public function getTypeNode($type) {
+    if (!isset($this->typeNodeMap)) {
+      // Make sure all templates are scanned and the typemap is built.
+      $this->getSectionTypeDefinitions();
+    }
+    return $this->typeNodeMap[$type];
+  }
+
+  /**
    * {@inheritdoc}
    */
   public function extractSectionData($document) {
@@ -82,6 +133,7 @@ class DocumentParser implements DocumentParserInterface {
       // attributes to the result.
       if ($node->hasAttribute('itemtype')) {
         $type = $node->getAttribute('itemtype');
+        $this->typeNodeMap[$type] = $node;
         // We also update the new parent type which will be used when processing
         // the children of the current node.
         $newParentType = $type;
