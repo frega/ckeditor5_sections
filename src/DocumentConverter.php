@@ -4,15 +4,149 @@ namespace Drupal\ckeditor5_sections;
 
 use Drupal\ckeditor5_sections\Plugin\DataType\DocumentSectionAdapter;
 use Drupal\Core\TypedData\ComplexDataDefinitionInterface;
-use Drupal\Core\TypedData\ComplexDataInterface;
 use Drupal\Core\TypedData\ListDataDefinitionInterface;
 use Drupal\Core\TypedData\ListInterface;
+use Drupal\Core\TypedData\TypedDataManagerInterface;
 
 /**
  * Parser class for extracting the section definitions and data from
  * templates and documents.
  */
-class DocumentParser implements DocumentParserInterface {
+class DocumentConverter implements DocumentConverterInterface {
+
+  /**
+   * @var \Drupal\Core\TypedData\TypedDataManagerInterface
+   */
+  protected $typedDataManager;
+
+  /**
+   * @var \Drupal\ckeditor5_sections\SectionsCollectorInterface
+   */
+  protected $sectionsCollector;
+
+  /**
+   * Maps type names to their template DOM nodes.
+   * @var \DOMElement[]
+   */
+  protected $typeNodeMap;
+
+  /**
+   * DocumentConverter constructor.
+   *
+   * @param \Drupal\Core\TypedData\TypedDataManagerInterface $typedDataManager
+   *   A typed data manager to register new data types.
+   * @param \Drupal\ckeditor5_sections\SectionsCollectorInterface $sectionsCollector
+   *   The sections collector to retrieve all defined templates.
+   */
+  public function __construct(
+    TypedDataManagerInterface $typedDataManager,
+    SectionsCollectorInterface $sectionsCollector
+  ) {
+    $this->sectionsCollector = $sectionsCollector;
+    $this->typedDataManager = $typedDataManager;
+  }
+
+  /**
+   * Retrieve all section type definitions.
+   * @return array
+   */
+  public function getSectionTypeDefinitions() {
+    $templates = $this->sectionsCollector->getSections();
+    $section_types = [];
+    foreach ($templates as $template) {
+      $section_types = array_merge($section_types, $this->extractSectionDefinitions($template['template']));
+    }
+    return $section_types;
+  }
+
+  /**
+   * Rebuild a document from its data representation.
+   *
+   * @param \Drupal\ckeditor5_sections\DocumentSection $section
+   *   The data representation of a document.
+   *
+   * @return \DOMDocument
+   */
+  public function buildDocument(DocumentSection $section) {
+    $xml = new \DOMDocument();
+    $xml->appendChild($this->buildDocumentSection($section, $xml));
+    return $xml;
+  }
+
+  /**
+   * Rebuild a single en section of a document.
+   */
+  protected function buildDocumentSection(DocumentSection $section, \DOMDocument $doc) {
+    $node = $doc->importNode($this->getTypeNode(substr($section->getType(), strlen('section:'))), TRUE);
+    $this->processTemplateNode($section, $node);
+    return $node;
+  }
+
+  /**
+   * Process one node in a template.
+   *
+   * @param \Drupal\ckeditor5_sections\DocumentSection $section
+   *   The current section object to write data to.
+   * @param \DOMElement $el
+   *   The current template DOM node.
+   */
+  protected function processTemplateNode(DocumentSection $section, \DOMElement $el) {
+    $fields = $section->getFields();
+    $current = $section->getType() === 'section:' . $el->getAttribute('itemtype');
+    $isContainer = $el->hasAttribute('ck-contains');
+    $removableAttributes = [];
+    foreach ($el->attributes as $attributeName => $attribute) {
+      if (strpos($attributeName, 'ck-') === 0) {
+        $removableAttributes[] = $attributeName;
+      }
+      if ($current) {
+        if (array_key_exists($attributeName, $fields)) {
+          $el->setAttribute($attributeName, $fields[$attributeName]);
+        }
+      }
+    }
+
+    foreach ($removableAttributes as $attributeName) {
+      $el->removeAttribute($attributeName);
+    }
+
+    if ($el->hasAttribute('itemprop')) {
+      $prop = $el->getAttribute('itemprop');
+      if ($el->hasAttribute('itemtype')) {
+        $next = $section->get($prop);
+        if ($next) {
+          $this->processTemplateNode($next, $el);
+          return;
+        }
+      }
+      elseif ($isContainer) {
+        $sections = $section->get($prop);
+        foreach ($sections as $child) {
+          $childSection = $this->buildDocumentSection($child, $el->ownerDocument);
+          $el->appendChild($childSection);
+        }
+      }
+      else {
+        $fragment = $el->ownerDocument->createDocumentFragment();
+        $fragment->appendXML('<div>' . $section->get($prop) . '</div>');
+        foreach ($el->childNodes as $child) {
+          $el->removeChild($child);
+        }
+
+        foreach ($fragment->firstChild->childNodes as $child) {
+          $el->appendChild($child);
+        }
+      }
+    }
+
+    if (!$isContainer) {
+      foreach ($el->childNodes as $child) {
+        if ($child instanceof \DOMElement) {
+          $this->processTemplateNode($section, $child);
+        }
+      }
+    }
+  }
 
   /**
    * {@inheritdoc}
@@ -35,10 +169,6 @@ class DocumentParser implements DocumentParserInterface {
     // If the 'itemtype' is empty, then the type will be set to string. If there
     // is an 'itemtype' then this will become the type of the field.
 
-    // 3. All the section types will have an additional field which is called
-    // 'content', of type string. The value should contain the actual html or
-    // xml content of the field, when the data will be extracted.
-
     $dom = new \DOMDocument();
     // Load the document and convert the encoding to HTML-ENTITIES, see
     // https://davidwalsh.name/domdocument-utf8-problem
@@ -46,6 +176,19 @@ class DocumentParser implements DocumentParserInterface {
     $result = [];
     $this->buildSectionDefinitions($dom, $result);
     return $result;
+  }
+
+  /**
+   * @param $type
+   *
+   * @return \DOMElement
+   */
+  public function getTypeNode($type) {
+    if (!isset($this->typeNodeMap)) {
+      // Make sure all templates are scanned and the typemap is built.
+      $this->getSectionTypeDefinitions();
+    }
+    return $this->typeNodeMap[$type];
   }
 
   /**
@@ -57,8 +200,11 @@ class DocumentParser implements DocumentParserInterface {
     //$list_definition = \Drupal::typedDataManager()->createListDataDefinition('section');
     //$result = \Drupal::typedDataManager()->create($list_definition);
     $result = [];
+    if($dom->documentElement->hasAttribute('itemtype')) {
+      throw new \Exception('Data extraction requires type definition at root.');
+    }
     $this->buildSectionData($dom, $result);
-    return $result;
+    return $result[0];
   }
 
   /**
@@ -77,6 +223,7 @@ class DocumentParser implements DocumentParserInterface {
       // attributes to the result.
       if ($node->hasAttribute('itemtype')) {
         $type = $node->getAttribute('itemtype');
+        $this->typeNodeMap[$type] = $node;
         // We also update the new parent type which will be used when processing
         // the children of the current node.
         $newParentType = $type;
@@ -84,34 +231,21 @@ class DocumentParser implements DocumentParserInterface {
         // result. For now, we just keep processing the data, so we will just
         // merge any new fields, but we may want to change this in the future.
         if (empty($result[$type])) {
-          // Also, all the sections will have by default a field named 'content'
-          // of type string. This will contain the whole html or xml extracted
-          // data.
           $result[$type] = [
             'type' => $type,
-            'fields' => [
-              'content' => [
-                'label' => 'content',
-                'type' => 'string',
-              ],
-            ],
+            'fields' => [],
           ];
         }
         foreach ($node->attributes as $attribute) {
           $attributeName = $attribute->nodeName;
           // Specific attributes should be ignored.
-          if (in_array($attributeName, ['itemtype', 'itemscope', 'itemprop', 'content', 'itemexpand', 'class'])) {
+          if (in_array($attributeName, ['itemtype', 'itemscope', 'itemprop', 'itemexpand', 'class'])) {
             continue;
           }
           // Also, if the attribute name starts with 'ck-', we ignore it as
           // well.
           if (strpos($attributeName, 'ck-') === 0) {
             continue;
-          }
-          // Make sure that the 'data-*' attributes are properly converted to
-          // camel case.
-          if (strpos($attributeName, 'data-') === 0) {
-            $attributeName = $this->convertDataAttributeName($attributeName);
           }
           // Add the attribute as a string field.
           $result[$type]['fields'][$attributeName] = [
@@ -152,6 +286,7 @@ class DocumentParser implements DocumentParserInterface {
 
   public function buildSectionData(\DOMNode $node, array &$sections_list, DocumentSection $parent = NULL) {
     $new_parent = $parent;
+    $stop_processing = FALSE;
     if ($node instanceof \DOMElement) {
       $value = [
         'item_type' => NULL,
@@ -167,7 +302,7 @@ class DocumentParser implements DocumentParserInterface {
         $field_name = $node->getAttribute('itemprop');
         $value['field_name'] = $field_name;
         /* @var \Drupal\Core\TypedData\ComplexDataDefinitionInterface $data_definition */
-        $data_definition = \Drupal::typedDataManager()->createDataDefinition($parent_type);
+        $data_definition = $this->typedDataManager->createDataDefinition($parent_type);
         $field_definition = $data_definition->getPropertyDefinition($field_name);
         // @todo: throw an exception maybe?
         if (!empty($field_definition)) {
@@ -181,7 +316,7 @@ class DocumentParser implements DocumentParserInterface {
         }
       }
       elseif ($node->hasAttribute('itemtype')) {
-        $value['item_type'] = $node->getAttribute('itemtype');
+        $value['item_type'] = 'section:' . $node->getAttribute('itemtype');
       }
 
       // We only process the actual item if we could extract the item type.
@@ -204,7 +339,7 @@ class DocumentParser implements DocumentParserInterface {
           $stop_processing = TRUE;
         }
         else {
-          $item_field_definition = \Drupal::typedDataManager()->createDataDefinition($value['item_type']);
+          $item_field_definition = $this->typedDataManager->createDataDefinition($value['item_type']);
           // If the field is a complex field, then we need to additionally check
           // the values of the attributes.
           if ($item_field_definition instanceof ComplexDataDefinitionInterface) {
@@ -212,17 +347,11 @@ class DocumentParser implements DocumentParserInterface {
             // Add all the attributes.
             foreach ($node->attributes as $attribute) {
               $attributeName = $attribute->nodeName;
-              // Make sure that the 'data-*' attributes are properly converted to
-              // camel case.
-              if (strpos($attributeName, 'data-') === 0) {
-                $attributeName = $this->convertDataAttributeName($attributeName);
-              }
               // Add the attribute to the current value.
               if ($item_field_definition->getPropertyDefinition($attributeName)) {
                 $item_field_data->set($attributeName, $node->getAttribute($attribute->nodeName));
               }
             }
-            $item_field_data->set('content', $this->getDOMInnerHtml($node));
             $new_parent = $item_field_data;
           }
           else {
@@ -279,7 +408,7 @@ class DocumentParser implements DocumentParserInterface {
         $field_name = $node->getAttribute('itemprop');
         $value['field_name'] = $field_name;
         /* @var \Drupal\Core\TypedData\ComplexDataDefinitionInterface $data_definition */
-        $data_definition = \Drupal::typedDataManager()->createDataDefinition($parent_type);
+        $data_definition = $this->typedDataManager->createDataDefinition($parent_type);
         $field_definition = $data_definition->getPropertyDefinition($field_name);
         // @todo: throw an exception maybe?
         if (!empty($field_definition)) {
@@ -299,38 +428,32 @@ class DocumentParser implements DocumentParserInterface {
       // We only process the actual item if we could extract the item type.
       if (!empty($value['item_type'])) {
         if ($value['item_cardinality'] === 'multiple') {
-          $item_field_definition = \Drupal::typedDataManager()->createListDataDefinition($value['item_type']);
-          $item_field_data = \Drupal::typedDataManager()->create($item_field_definition);
+          $item_field_definition = $this->typedDataManager->createListDataDefinition($value['item_type']);
+          $item_field_data = $this->typedDataManager->create($item_field_definition);
           $update_new_result = TRUE;
         }
         else {
-          $item_field_definition = \Drupal::typedDataManager()->createDataDefinition($value['item_type']);
+          $item_field_definition = $this->typedDataManager->createDataDefinition($value['item_type']);
           // If the field is a complex field, then we need to additionally check
           // the values of the attributes.
           if ($item_field_definition instanceof ComplexDataDefinitionInterface) {
             /* @var \Drupal\Core\TypedData\ComplexDataInterface $item_field_data */
-            $item_field_data = \Drupal::typedDataManager()->create($item_field_definition);
+            $item_field_data = $this->typedDataManager->create($item_field_definition);
             // Add all the attributes.
             foreach ($node->attributes as $attribute) {
               $attributeName = $attribute->nodeName;
-              // Make sure that the 'data-*' attributes are properly converted to
-              // camel case.
-              if (strpos($attributeName, 'data-') === 0) {
-                $attributeName = $this->convertDataAttributeName($attributeName);
-              }
               // Add the attribute to the current value.
               if ($item_field_definition->getPropertyDefinition($attributeName)) {
                 $item_field_data->set($attributeName, $node->getAttribute($attribute->nodeName));
               }
             }
-            $item_field_data->set('content', $this->getDOMInnerHtml($node));
             $item_field_data->set('section_type', $value['item_type']);
             $update_new_parent = TRUE;
           }
           else {
             // If the field is just a simple (scalar) field, then we just dump
             // the entire html of th node in it for now.
-            $item_field_data = \Drupal::typedDataManager()->create($item_field_definition, $this->getDOMInnerHtml($node));
+            $item_field_data = $this->typedDataManager->create($item_field_definition, $this->getDOMInnerHtml($node));
           }
         }
         // If we are in the context of a parent, then just set the item data
@@ -366,32 +489,6 @@ class DocumentParser implements DocumentParserInterface {
         $this->buildSectionData($child, $new_result, $new_parent);
       }
     }
-  }
-
-  /**
-   * Converts a data attribute name to camel case, according to
-   * https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/dataset
-   *
-   * @param string $attributeName
-   *  The data attribute name
-   * @return string
-   *  The converted attribute name.
-   */
-  protected function convertDataAttributeName($attributeName) {
-    $convertedName = $attributeName;
-    // Remove first the 'data-' prefix. We assume that the attributeName starts
-    // with 'data-', so we directly remove the first 5 characters.
-    $convertedName = substr($convertedName, 5);
-    // Next, make each lowercase letter which follows a dash uppercase, and
-    // remove the dash.
-    $chrArray = preg_split('//u', $convertedName);
-    for ($i = 0; $i < count($chrArray) - 1; $i++) {
-      if ($chrArray[$i] === '-' && preg_match('/[a-z]/', $chrArray[$i+1])) {
-        $chrArray[$i+1] = mb_strtoupper($chrArray[$i+1]);
-        unset($chrArray[$i]);
-      }
-    }
-    return implode('', $chrArray);
   }
 
   /**

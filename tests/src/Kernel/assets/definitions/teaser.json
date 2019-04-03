@@ -1,0 +1,53 @@
+{
+  "teaser": {
+    "type": "teaser",
+    "fields": {
+      "data-layout": {
+        "label": "data-layout",
+        "type": "string"
+      },
+      "image": {
+        "type": "section:image",
+        "label": "image"
+      },
+      "headline": {
+        "label": "headline",
+        "type": "string"
+      },
+      "text": {
+        "label": "text",
+        "type": "string"
+      },
+      "link": {
+        "label": "link",
+        "type": "section:button"
+      }
+    }
+  },
+  "image": {
+    "type": "image",
+    "fields": {
+      "data-media-type": {
+        "label": "data-media-type",
+        "type": "string"
+      },
+      "data-media-uuid": {
+        "label": "data-media-uuid",
+        "type": "string"
+      }
+    }
+  },
+  "button": {
+    "type": "button",
+    "fields": {
+      "href": {
+        "label": "href",
+        "type": "string"
+      },
+      "text": {
+        "label": "text",
+        "type": "string"
+      }
+    }
+  }
+}
