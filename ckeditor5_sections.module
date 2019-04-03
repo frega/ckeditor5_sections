@@ -5,6 +5,9 @@
  * Contains hook implementations for the ckeditor5_sections module.
  */
 
+use Drupal\ckeditor5_sections\Field\TextLongWithSectionsItem;
+use Drupal\ckeditor5_sections\Field\TextWithSummaryAndSectionsItem;
+
 /**
  * Implements hook_views_data_alter().
  */
@@ -15,4 +18,19 @@ function ckeditor5_sections_views_data_alter(&$data) {
   $data['node_field_data']['node_library_select_form'] = $data['media']['media_library_select_form'];
   $data['node_field_data']['node_library_select_form']['title'] = t('Select Node');
   $data['node_field_data']['node_library_select_form']['real field'] = 'nid';
+}
+
+/**
+ * Implements hook_field_info_alter().
+ */
+function ckeditor5_sections_field_info_alter(&$info) {
+  $field_types = [
+    'text_with_summary' => TextWithSummaryAndSectionsItem::class,
+    'text_long' => TextLongWithSectionsItem::class,
+  ];
+  foreach ($field_types as $field_type => $class_name) {
+    if (!empty($info[$field_type])) {
+      $info[$field_type]['class'] = $class_name;
+    }
+  }
 }
