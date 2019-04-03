@@ -148,7 +148,7 @@ class CKEditor5Sections extends EditorBase implements ContainerFactoryPluginInte
    */
   public function getDefaultSettings() {
     return [
-      'templateDirectory' => drupal_get_path('module', 'ckeditor5_sections') . '/sections',
+      'templateDirectory' => '',
       'rootElement' => '',
       'enabledSections' => [],
       'editorBuild' => 'ckeditor5_sections/editor_build',
@@ -168,11 +168,11 @@ class CKEditor5Sections extends EditorBase implements ContainerFactoryPluginInte
     $settings = $editor->getSettings();
     $templateDirectory = $form_state->getValue(['editor','settings', 'templateDirectory'], $settings['templateDirectory']);
     $sections = $this->sectionsCollector->collectSections($templateDirectory);
-
+    $defaultDir = drupal_get_path('module', 'ckeditor5_sections') . '/sections';
     $form['templateDirectory'] = [
       '#type' => 'textfield',
       '#title' => $this->t('Template directory'),
-      '#description' => $this->t('The directory that will be scanned for editor templates.'),
+      '#description' => $this->t('The directory that will be scanned for editor templates. If left empty, %dir is used.', ['%dir' => $defaultDir]),
       '#default_value' => $settings['templateDirectory'],
       '#ajax' => [
         'disable-refocus' => 'true',
