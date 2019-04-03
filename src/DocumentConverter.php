@@ -12,12 +12,17 @@ use Drupal\Core\TypedData\TypedDataManagerInterface;
  * Parser class for extracting the section definitions and data from
  * templates and documents.
  */
-class DocumentConverter implements DocumentParserInterface {
+class DocumentConverter implements DocumentConverterInterface {
 
   /**
    * @var \Drupal\Core\TypedData\TypedDataManagerInterface
    */
   protected $typedDataManager;
+
+  /**
+   * @var \Drupal\ckeditor5_sections\SectionsCollectorInterface
+   */
+  protected $sectionsCollector;
 
   /**
    * Maps type names to their template DOM nodes.
@@ -26,10 +31,13 @@ class DocumentConverter implements DocumentParserInterface {
   protected $typeNodeMap;
 
   /**
-   * @var \Drupal\ckeditor5_sections\SectionsCollectorInterface
+   * DocumentConverter constructor.
+   *
+   * @param \Drupal\Core\TypedData\TypedDataManagerInterface $typedDataManager
+   *   A typed data manager to register new data types.
+   * @param \Drupal\ckeditor5_sections\SectionsCollectorInterface $sectionsCollector
+   *   The sections collector to retrieve all defined templates.
    */
-  protected $sectionsCollector;
-
   public function __construct(
     TypedDataManagerInterface $typedDataManager,
     SectionsCollectorInterface $sectionsCollector
@@ -38,6 +46,10 @@ class DocumentConverter implements DocumentParserInterface {
     $this->typedDataManager = $typedDataManager;
   }
 
+  /**
+   * Retrieve all section type definitions.
+   * @return array
+   */
   public function getSectionTypeDefinitions() {
     $templates = $this->sectionsCollector->getSections();
     $section_types = [];
@@ -47,24 +59,45 @@ class DocumentConverter implements DocumentParserInterface {
     return $section_types;
   }
 
+  /**
+   * Rebuild a document from its data representation.
+   *
+   * @param \Drupal\ckeditor5_sections\DocumentSection $section
+   *   The data representation of a document.
+   *
+   * @return \DOMDocument
+   */
   public function buildDocument(DocumentSection $section) {
     $xml = new \DOMDocument();
     $xml->appendChild($this->buildDocumentSection($section, $xml));
     return $xml;
   }
 
+  /**
+   * Rebuild a single en section of a document.
+   */
   protected function buildDocumentSection(DocumentSection $section, \DOMDocument $doc) {
     $node = $doc->importNode($this->getTypeNode(substr($section->getType(), strlen('section:'))), TRUE);
-    $this->processTemplateNode($section, $node, TRUE);
-    $doc->appendChild($node);
+    $this->processTemplateNode($section, $node);
     return $node;
   }
 
-  protected function processTemplateNode(DocumentSection $section, \DOMElement $el, $current = FALSE) {
+  /**
+   * Process one node in a template.
+   *
+   * @param \Drupal\ckeditor5_sections\DocumentSection $section
+   *   The current section object to write data to.
+   * @param \DOMElement $el
+   *   The current template DOM node.
+   */
+  protected function processTemplateNode(DocumentSection $section, \DOMElement $el) {
     $fields = $section->getFields();
+    $current = $section->getType() === 'section:' . $el->getAttribute('itemtype');
+    $isContainer = $el->hasAttribute('ck-contains');
+    $removableAttributes = [];
     foreach ($el->attributes as $attributeName => $attribute) {
       if (strpos($attributeName, 'ck-') === 0) {
-        $el->removeAttribute($attributeName);
+        $removableAttributes[] = $attributeName;
       }
       if ($current) {
         if (array_key_exists($attributeName, $fields)) {
@@ -73,17 +106,29 @@ class DocumentConverter implements DocumentParserInterface {
       }
     }
 
+    foreach ($removableAttributes as $attributeName) {
+      $el->removeAttribute($attributeName);
+    }
+
     if ($el->hasAttribute('itemprop')) {
+      $prop = $el->getAttribute('itemprop');
       if ($el->hasAttribute('itemtype')) {
-        $next = $section->get($el->getAttribute('itemprop'));
+        $next = $section->get($prop);
         if ($next) {
-          $this->processTemplateNode($next, $el, TRUE);
+          $this->processTemplateNode($next, $el);
           return;
+        }
+      }
+      elseif ($isContainer) {
+        $sections = $section->get($prop);
+        foreach ($sections as $child) {
+          $childSection = $this->buildDocumentSection($child, $el->ownerDocument);
+          $el->appendChild($childSection);
         }
       }
       else {
         $fragment = $el->ownerDocument->createDocumentFragment();
-        $fragment->appendXML('<div>' . $section->get($el->getAttribute('itemprop')) . '</div>');
+        $fragment->appendXML('<div>' . $section->get($prop) . '</div>');
         foreach ($el->childNodes as $child) {
           $el->removeChild($child);
         }
@@ -94,9 +139,11 @@ class DocumentConverter implements DocumentParserInterface {
       }
     }
 
-    foreach ($el->childNodes as $child) {
-      if ($child instanceof \DOMElement) {
-        $this->processTemplateNode($section, $child);
+    if (!$isContainer) {
+      foreach ($el->childNodes as $child) {
+        if ($child instanceof \DOMElement) {
+          $this->processTemplateNode($section, $child);
+        }
       }
     }
   }
@@ -153,8 +200,11 @@ class DocumentConverter implements DocumentParserInterface {
     //$list_definition = \Drupal::typedDataManager()->createListDataDefinition('section');
     //$result = \Drupal::typedDataManager()->create($list_definition);
     $result = [];
+    if($dom->documentElement->hasAttribute('itemtype')) {
+      throw new \Exception('Data extraction requires type definition at root.');
+    }
     $this->buildSectionData($dom, $result);
-    return $result;
+    return $result[0];
   }
 
   /**

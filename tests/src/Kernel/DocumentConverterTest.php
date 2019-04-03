@@ -27,7 +27,16 @@ class DocumentConverterTest extends KernelTestBase {
     $this->installConfig(['ckeditor5_sections']);
   }
 
-
+  /**
+   * Helper function to load all asset pairs (*.html + *.json files) from a
+   * given directory. Used in test data providers.
+   *
+   * @param $directory
+   *   The directory to scan.
+   *
+   * @return array
+   *   Two dimensional array of html/json pairs.
+   */
   protected function loadTestAssets($directory) {
     $data = [];
     $dir = dirname(__FILE__) . '/' . $directory;
@@ -46,19 +55,27 @@ class DocumentConverterTest extends KernelTestBase {
   }
 
   /**
+   * Data provider for testExtractSectionDefinitions().
+   */
+  public function extractSectionDefinitionsProvider() {
+    return $this->loadTestAssets('assets/definitions');
+  }
+
+
+  /**
+   * Data provider for document conversion tests.
+   */
+  public function extractSectionDataProvider() {
+    return $this->loadTestAssets('assets/data');
+  }
+
+  /**
    * @covers \Drupal\ckeditor5_sections\DocumentConverter::extractSectionDefinitions
    * @dataProvider extractSectionDefinitionsProvider
    */
   public function testExtractSectionDefinitions($template, $result) {
     $documentParser = $this->container->get('ckeditor5_sections.document_converter');
     $this->assertEquals($result, $documentParser->extractSectionDefinitions($template));
-  }
-
-  /**
-   * Data provider for testExtractSectionDefinitions().
-   */
-  public function extractSectionDefinitionsProvider() {
-    return $this->loadTestAssets('assets/definitions');
   }
 
   /**
@@ -70,7 +87,7 @@ class DocumentConverterTest extends KernelTestBase {
     $normalizer = new DocumentSectionNormalizer();;
     $documentParser = $this->container->get('ckeditor5_sections.document_converter');
     /** @var \Drupal\ckeditor5_sections\DocumentSection $data */
-    $data = $documentParser->extractSectionData($document)[0];
+    $data = $documentParser->extractSectionData($document);
     $this->assertEquals($result, $normalizer->normalize($data, 'json'));
   }
 
@@ -83,12 +100,8 @@ class DocumentConverterTest extends KernelTestBase {
     $normalizer = new DocumentSectionNormalizer();
     $documentParser = $this->container->get('ckeditor5_sections.document_converter');
     /** @var \Drupal\ckeditor5_sections\DocumentSection $data */
-    $data = $documentParser->extractSectionData($document)[0];
+    $data = $documentParser->extractSectionData($document);
     $this->assertEquals($data, $normalizer->denormalize($normalizer->normalize($data)));
-  }
-
-  public function extractSectionDataProvider() {
-    return $this->loadTestAssets('assets/data');
   }
 
   /**

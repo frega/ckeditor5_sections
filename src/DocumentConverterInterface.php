@@ -10,7 +10,7 @@ namespace Drupal\ckeditor5_sections;
  * section types and their fields and to parse a data document in order to
  * extract its actual data.
  */
-interface DocumentParserInterface {
+interface DocumentConverterInterface {
 
   /**
    * Extracts the section definitions from a document, sent as a parameter. The
@@ -71,8 +71,19 @@ interface DocumentParserInterface {
    *
    * @param string $document
    *  The document to be parsed for the data.
-   * @return mixed
-   *  The extracted data.
+   * @return \Drupal\ckeditor5_sections\DocumentSection
+   *  The root section object.
    */
   public function extractSectionData($document);
+
+  /**
+   * Rebuild a document from a DocumentSection object.
+   *
+   * @param \Drupal\ckeditor5_sections\DocumentSection $section
+   *   The input section.
+   *
+   * @return \DOMDocument
+   *   The rebuilt document.
+   */
+  public function buildDocument(DocumentSection $section);
 }
