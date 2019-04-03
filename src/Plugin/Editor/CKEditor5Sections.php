@@ -166,8 +166,7 @@ class CKEditor5Sections extends EditorBase implements ContainerFactoryPluginInte
    */
   public function settingsForm(array $form, FormStateInterface $form_state, Editor $editor) {
     $settings = $editor->getSettings();
-    $templateDirectory = $form_state->getValue(['editor','settings', 'templateDirectory'], $settings['templateDirectory']);
-    $sections = $this->sectionsCollector->collectSections($templateDirectory);
+    $sections = $this->sectionsCollector->getSections();
     $defaultDir = drupal_get_path('module', 'ckeditor5_sections') . '/sections';
     $form['templateDirectory'] = [
       '#type' => 'textfield',
@@ -292,7 +291,7 @@ class CKEditor5Sections extends EditorBase implements ContainerFactoryPluginInte
    */
   public function getJSSettings(Editor $editor) {
     $settings = $editor->getSettings();
-    $sections = $this->sectionsCollector->collectSections($settings['templateDirectory']);
+    $sections = $this->sectionsCollector->getSections();
     $enabledSections = array_filter(array_values($settings['enabledSections']));
     $rootElement = $settings['rootElement'];
 
