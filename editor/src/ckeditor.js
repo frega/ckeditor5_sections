@@ -24,6 +24,7 @@ import TabsElement from '@amazee/ckeditor5-template/src/elements/tabselement'
 import GalleryElement from "@amazee/ckeditor5-template/src/elements/galleryelement";
 import MergeEditing from "@amazee/ckeditor5-template/src/mergeediting";
 import TextConstraintElement from "@amazee/ckeditor5-template/src/elements/textconstraintelement";
+import Underline from '@ckeditor/ckeditor5-basic-styles/src/underline';
 
 import Placeholder from '@amazee/editor-components/components/placeholder/placeholder';
 import Media from '@amazee/editor-components/components/media/media';
@@ -59,6 +60,7 @@ SectionsEditor.builtinPlugins = [
 	Autoformat,
 	Bold,
 	Italic,
+	Underline,
 	BlockQuote,
 	Heading,
 	List,

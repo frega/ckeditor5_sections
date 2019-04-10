@@ -283,7 +283,8 @@ class CKEditor5Sections extends EditorBase implements ContainerFactoryPluginInte
    * {@inheritdoc}
    */
   public function getLibraries(Editor $editor) {
-    return ['ckeditor5_sections/editor'];
+    $settings = $editor->getSettings();
+    return ['ckeditor5_sections/editor', $settings['editorBuild']];
   }
 
   /**
