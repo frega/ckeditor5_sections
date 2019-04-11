@@ -11,7 +11,7 @@
 
   Drupal.editors.ckeditor5_sections = {
     attach: function attach(element, format) {
-      init(element, format.editorSettings).then(editor => {
+      init(element, format).then(editor => {
         editors[element.id] = editor;
         editor.model.document.on('change', () => {
           $(element).val(editor.getData());
@@ -38,11 +38,12 @@
    *
    * @param element
    *   The target input element.
-   * @param editorSettings
-   *   Editor settings.
+   * @param format
+   *   Text format settings.
    * @returns {editor}
    */
-  function init(element, editorSettings) {
+  function init(element, format) {
+    var editorSettings = format.editorSettings;
     $(element).hide();
 
     var editor = document.createElement('div');
@@ -129,7 +130,7 @@
           dialog: dialogSettings,
           dialogType: 'modal',
           selector: '.ckeditor-dialog-loading-link',
-          url:  Drupal.url('editor/dialog/link/ckeditor5_sections'),
+          url:  Drupal.url('editor/dialog/link/' + format.format),
           progress: { type: 'throbber' },
           submit: {
             editor_object: existingValues
