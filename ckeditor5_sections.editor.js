@@ -85,7 +85,7 @@
 
       drupalMediaSelector: { callback: (type, operation, callback) => {
         currentCallback = callback;
-        var path = (operation === 'add') ? '/admin/content/media-widget-upload' : '/admin/content/media-widget';
+        var path = '/sections/dialog';
 
         // Filter allowed media types.
         var typeFilter = '';
@@ -97,7 +97,7 @@
         }
 
         Drupal.ajax({
-          url: path + '?media_library_widget_id=' + $(element).attr('id') + typeFilter + '&media_library_remaining=1&return_type=uuid',
+          url: path + '?media_library_widget_id=' + $(element).attr('id') + typeFilter + '&media_library_remaining=1&return_type=uuid&media_library_selected_type=image&media_library_remaining=1',
           dialogType: 'modal',
           dialog: {
             dialogClass: 'media-library-widget-modal',
