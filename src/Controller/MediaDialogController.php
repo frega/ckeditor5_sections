@@ -44,18 +44,25 @@ class MediaDialogController extends ControllerBase {
    */
   public function openDialog() {
     $query = $this->request->query;
-
+    $field_id = $query->get('field_id');
     $stateParams = [
       'media_library_allowed_types' => $query->get('media_library_allowed_types'),
       'media_library_selected_type' => $query->get('media_library_selected_type'),
       'media_library_remaining' => $query->get('media_library_remaining'),
     ];
 
-    $stateParams['media_library_opener_id'] = 'sections_' . implode('_', $query->get('media_library_allowed_types'));
+    $stateParams['media_library_opener_id'] = 'field:' . $field_id;
 
     $state = new MediaLibraryState($stateParams);
 
     $libraryUi = \Drupal::service('media_library.ui_builder')->buildUi($state);
+
+    if ($query->get('upload_form')) {
+      unset($libraryUi['content']['view']);
+    } else {
+      unset($libraryUi['content']['form']);
+    }
+
     $dialogOptions = MediaLibraryUiBuilder::dialogOptions();
     return (new AjaxResponse())
       ->addCommand(new OpenModalDialogCommand($dialogOptions['title'], $libraryUi, $dialogOptions));
