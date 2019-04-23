@@ -65,7 +65,7 @@
   "dependencies": {
     "@amazee/ckeditor5-drupal-linkit": "https://github.com/AmazeeLabs/ckeditor5-drupal-linkit",
     "@amazee/ckeditor5-drupal-media": "https://github.com/AmazeeLabs/ckeditor5-drupal-media",
-    "@amazee/ckeditor5-template": "https://github.com/AmazeeLabs/ckeditor5-template",
+    "@amazee/ckeditor5-template": "https://github.com/AmazeeLabs/ckeditor5-template#f4fa39910bfcdc804ebd5b34a61bc30eb8f0d6d9",
     "@amazee/editor-components": "https://github.com/AmazeeLabs/editor-components.git"
   }
 }

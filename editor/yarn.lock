@@ -18,9 +18,9 @@
     "@ckeditor/ckeditor5-utils" "^11.1.0"
     "@ckeditor/ckeditor5-widget" "^10.3.1"
 
-"@amazee/ckeditor5-template@https://github.com/AmazeeLabs/ckeditor5-template":
+"@amazee/ckeditor5-template@https://github.com/AmazeeLabs/ckeditor5-template#f4fa39910bfcdc804ebd5b34a61bc30eb8f0d6d9":
   version "0.0.27"
-  resolved "https://github.com/AmazeeLabs/ckeditor5-template#0ef081f7100200527179ad53295002a3a8287ac6"
+  resolved "https://github.com/AmazeeLabs/ckeditor5-template#f4fa39910bfcdc804ebd5b34a61bc30eb8f0d6d9"
   dependencies:
     "@ckeditor/ckeditor5-core" "^11.1.0"
     "@ckeditor/ckeditor5-engine" "^12.0.0"
