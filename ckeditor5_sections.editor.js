@@ -85,19 +85,23 @@
 
       drupalMediaSelector: { callback: (type, operation, callback) => {
         currentCallback = callback;
-        var path = (operation === 'add') ? '/admin/content/media-widget-upload' : '/admin/content/media-widget';
+        var path = (operation === 'add') ? '/sections/dialog?upload_form=1' : '/sections/dialog?upload_form=0';
 
         // Filter allowed media types.
         var typeFilter = '';
+        var selectedType = '';
         if (typeof type != 'undefined') {
           var types = type.split(' ');
+          if (!selectedType) {
+            selectedType = types[0];
+          }
           types.forEach((item) => {
             typeFilter += '&media_library_allowed_types[' + item + ']=' + item;
           });
         }
 
         Drupal.ajax({
-          url: path + '?media_library_widget_id=' + $(element).attr('id') + typeFilter + '&media_library_remaining=1&return_type=uuid',
+          url: path + '&field_id=' + $(element).attr('id') + typeFilter + '&media_library_remaining=1&return_type=uuid&media_library_selected_type=' + selectedType + '&media_library_remaining=1',
           dialogType: 'modal',
           dialog: {
             dialogClass: 'media-library-widget-modal',
