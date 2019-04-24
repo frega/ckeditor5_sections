@@ -26,6 +26,8 @@ import MergeEditing from "@amazee/ckeditor5-template/src/mergeediting";
 import TextConstraintElement from "@amazee/ckeditor5-template/src/elements/textconstraintelement";
 import Underline from '@ckeditor/ckeditor5-basic-styles/src/underline';
 
+import PasteFromOffice from '@ckeditor/ckeditor5-paste-from-office/src/pastefromoffice';
+
 import Placeholder from '@amazee/editor-components/components/placeholder/placeholder';
 import Media from '@amazee/editor-components/components/media/media';
 import '@amazee/editor-components/components/container/container';
@@ -57,6 +59,7 @@ SectionsEditor.builtinPlugins = [
 	PlaceholderConfig,
 	RemoteControl,
 	Essentials,
+	PasteFromOffice,
 	Autoformat,
 	Bold,
 	Italic,

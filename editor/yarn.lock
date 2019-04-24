@@ -18,9 +18,9 @@
     "@ckeditor/ckeditor5-utils" "^11.1.0"
     "@ckeditor/ckeditor5-widget" "^10.3.1"
 
-"@amazee/ckeditor5-template@https://github.com/AmazeeLabs/ckeditor5-template#f4fa39910bfcdc804ebd5b34a61bc30eb8f0d6d9":
+"@amazee/ckeditor5-template@https://github.com/AmazeeLabs/ckeditor5-template#7ed007ffe5b194a634d1ebb761a2f3a9a84d80fa":
   version "0.0.27"
-  resolved "https://github.com/AmazeeLabs/ckeditor5-template#f4fa39910bfcdc804ebd5b34a61bc30eb8f0d6d9"
+  resolved "https://github.com/AmazeeLabs/ckeditor5-template#7ed007ffe5b194a634d1ebb761a2f3a9a84d80fa"
   dependencies:
     "@ckeditor/ckeditor5-core" "^11.1.0"
     "@ckeditor/ckeditor5-engine" "^12.0.0"
@@ -777,6 +777,14 @@
     "@ckeditor/ckeditor5-core" "^11.1.0"
     "@ckeditor/ckeditor5-ui" "^11.2.0"
     "@ckeditor/ckeditor5-utils" "^11.1.0"
+
+"@ckeditor/ckeditor5-paste-from-office@ckeditor/ckeditor5-paste-from-office#2fa62c77f4d4f4c2d3e9bdc7b421cc66104d6967":
+  version "10.0.0"
+  resolved "https://codeload.github.com/ckeditor/ckeditor5-paste-from-office/tar.gz/2fa62c77f4d4f4c2d3e9bdc7b421cc66104d6967"
+  dependencies:
+    "@ckeditor/ckeditor5-clipboard" "^10.0.4"
+    "@ckeditor/ckeditor5-core" "^11.1.0"
+    "@ckeditor/ckeditor5-engine" "^12.0.0"
 
 "@ckeditor/ckeditor5-table@^11.0.1":
   version "11.0.1"
