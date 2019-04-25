@@ -50,7 +50,7 @@ class CKEditor5SectionsMediaLibrarySelectForm extends MediaLibrarySelectForm {
 
     // The selection is persistent across different pages in the media library
     // and populated via JavaScript.
-    $selection_field_id = $this->options['id'] . '_selection';
+    $selection_field_id = 'media_library_select_form_selection';
     $form[$selection_field_id] = [
       '#type' => 'hidden',
       '#attributes' => [
@@ -80,6 +80,7 @@ class CKEditor5SectionsMediaLibrarySelectForm extends MediaLibrarySelectForm {
     $form['actions']['submit']['#value'] = $this->t('Select entity');
     $form['actions']['submit']['#button_type'] = 'primary';
     $form['actions']['submit']['#field_id'] = $selection_field_id;
+    $form['actions']['submit']['#option_id'] = $this->options['id'];
 
     $form['actions']['submit']['#attributes'] = [
       'class' => ['media-library-select'],
@@ -93,15 +94,29 @@ class CKEditor5SectionsMediaLibrarySelectForm extends MediaLibrarySelectForm {
    */
   public static function updateWidget(array &$form, FormStateInterface $form_state) {
     $field_id = $form_state->getTriggeringElement()['#field_id'];
-    $selected = array_filter(explode(',', $form_state->getValue($field_id, [])));
 
     $response = new AjaxResponse();
     $response->addCommand(new CloseDialogCommand());
 
-    $ids = implode(',', $selected);
+    $request = $form_state->get('view')->getRequest();
 
-    $opener_id = MediaLibraryState::fromRequest($form_state->get('view')->getRequest())->getOpenerId();
-    if ($field_id = MediaLibraryWidget::getOpenerFieldId($opener_id)) {
+    if ($request->get('content_library_widget_id')) {
+      $optionId = $form_state->getTriggeringElement()['#option_id'];
+      $selected = array_filter($form_state->getValue($optionId, []));
+
+      $ids = implode(',', $selected);
+      $field_id = $request->get('content_library_widget_id');
+    }
+    else {
+      $selected = array_filter(explode(',', $form_state->getValue($field_id, [])));
+
+      $ids = implode(',', $selected);
+
+      $opener_id = MediaLibraryState::fromRequest($request)->getOpenerId();
+      $field_id = MediaLibraryWidget::getOpenerFieldId($opener_id);
+    }
+
+    if ($field_id) {
       $response
         ->addCommand(new InvokeCommand("[data-media-library-widget-value=\"$field_id\"]", 'val', [$ids]))
         ->addCommand(new InvokeCommand("[data-media-library-widget-update=\"$field_id\"]", 'trigger', ['mousedown']));
