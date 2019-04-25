@@ -6,6 +6,8 @@ use Drupal\Core\Ajax\AjaxResponse;
 use Drupal\Core\Ajax\CloseDialogCommand;
 use Drupal\Core\Ajax\InvokeCommand;
 use Drupal\Core\Form\FormStateInterface;
+use Drupal\media_library\Ajax\UpdateSelectionCommand;
+use Drupal\Core\Ajax\ReplaceCommand;
 use Drupal\media_library\Form\FileUploadForm;
 use Drupal\media\MediaInterface;
 use Drupal\media_library\Plugin\Field\FieldWidget\MediaLibraryWidget;
@@ -55,6 +57,25 @@ class SectionsMediaLibraryUploadForm extends FileUploadForm {
     $element['upload_button']['#ajax']['options']['query'] = $query;
 
     return $element;
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function updateLibrary(array &$form, FormStateInterface $form_state) {
+    if ($form_state::hasAnyErrors()) {
+      return $form;
+    }
+
+    $return_type = $this->getRequest()->query->get('return_type');
+    $media_ids = array_map(function (MediaInterface $media) use ($return_type) {
+      return $return_type == 'uuid' ? $media->uuid() : $media->id();
+    }, $this->getAddedMediaItems($form_state));
+
+    $response = new AjaxResponse();
+    $response->addCommand(new UpdateSelectionCommand($media_ids));
+    $response->addCommand(new ReplaceCommand('#media-library-add-form-wrapper', $this->buildMediaLibraryUi($form_state)));
+    return $response;
   }
 
   /**
