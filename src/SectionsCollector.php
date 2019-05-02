@@ -31,7 +31,10 @@ class SectionsCollector implements SectionsCollectorInterface {
    * @return array
    *  An array of all the available sections.
    */
-  public function getSections() {
+  public function getSections($directory = NULL) {
+    if ($directory) {
+      return $this->collectSectionsFromDirectory($directory);
+    }
     if (!isset($this->sections)) {
 
       /** @var \Drupal\Core\Config\Entity\ConfigEntityStorageInterface $storage */
@@ -40,6 +43,7 @@ class SectionsCollector implements SectionsCollectorInterface {
       /** @var Editor[] $editors */
       $editors = $storage->loadByProperties([
         'editor' => 'ckeditor5_sections',
+        'status' => TRUE
       ]);
 
       /** @var \Drupal\ckeditor5_sections\SectionsCollectorInterface $collector */

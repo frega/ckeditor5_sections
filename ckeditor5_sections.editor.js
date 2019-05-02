@@ -22,14 +22,11 @@
       });
     },
     detach: function (element, format, trigger) {
-      // console.log('detach');
       if (trigger !== 'serialize') {
         editors[element.id].destroy();
       }
     },
     onChange: function (element, callback) {
-      // console.log('change');
-      // editors[element.id].on('change', debounce(callback, 500));
     }
   };
 
@@ -47,6 +44,7 @@
     $(element).hide();
 
     var editor = document.createElement('div');
+    editor.classList.add('ck-editor');
     $(editor).insertAfter(element);
     editor.innerHTML = $(element).val();
 
@@ -76,27 +74,41 @@
       currentCallback(values.attributes);
     });
 
-    window.ckeditor5_sections_builds = window.ckeditor5_sections_builds || {};
+    editor.addEventListener('ck-editor:available-sections', function (event) {
+      var sections = Object.keys(editorSettings.templates).map(id => ({
+        id: id,
+        label: editorSettings.templates[id].label,
+        icon: editorSettings.templates[id].icon
+      }));
+      event.respond(sections)
+    });
 
-    return window.ckeditor5_sections_builds[editorSettings.editorBuild].create(editor, {
-      masterTemplate: editorSettings.masterTemplate,
-      templates: editorSettings.templates,
-      templateAttributes: editorSettings.templateAttributes,
-      templateSession: editorSettings.templateSession,
+    var handleSelect = function (event, operation) {
 
-      drupalMediaSelector: { callback: (type, operation, callback) => {
-        currentCallback = callback;
+      if (!(event.detail.type && event.detail.type.includes(':'))) {
+        return;
+      }
+
+      var type = event.detail.type.split(':')[0];
+      var bundle = event.detail.type.split(':')[1];
+
+      currentCallback = function (response) {
+        event.respond(response);
+        currentCallback = null;
+      };
+
+      var typeFilter = '';
+      var selectedType = '';
+
+      if (type === 'media') {
         var path = (operation === 'add') ? '/sections/dialog?upload_form=1' : '/sections/dialog?upload_form=0';
 
         // Filter allowed media types.
-        var typeFilter = '';
-        var selectedType = '';
-        if (typeof type != 'undefined') {
-          var types = type.split(' ');
-          if (!selectedType) {
-            selectedType = types[0];
-          }
-          types.forEach((item) => {
+        if (typeof bundle != 'undefined') {
+          bundle.split(' ').forEach((item) => {
+            if (!selectedType) {
+              selectedType = item;
+            }
             typeFilter += '&media_library_allowed_types[' + item + ']=' + item;
           });
         }
@@ -111,49 +123,15 @@
             title: 'Media library',
           }
         }).execute();
-      } },
-      drupalMediaRenderer: { callback: (uuid, display, callback) => {
-        $.ajax('/sections/media-preview/' + uuid + '/' + display || 'default' ).done(callback);
-      } },
-      drupalLinkSelector: { callback: (existingValues = {},  callback ) => {
-        currentCallback = callback;
-        var dialogSettings = {
-          title: existingValues.href ? Drupal.t('Edit link') : Drupal.t('Add link'),
-          dialogClass: 'editor-link-dialog'
-        };
-        if (existingValues.href) {
-          existingValues.href = existingValues.href.split('#')[0];
-        }
+      }
+      else {
 
-        var classes = dialogSettings.dialogClass ? dialogSettings.dialogClass.split(' ') : [];
-        dialogSettings.dialogClass = classes.join(' ');
-        dialogSettings.autoResize = window.matchMedia('(min-width: 600px)').matches;
-        dialogSettings.width = 'auto';
-
-        var AjaxDialog = Drupal.ajax({
-          dialog: dialogSettings,
-          dialogType: 'modal',
-          selector: '.ckeditor-dialog-loading-link',
-          url:  Drupal.url('editor/dialog/link/' + format.format),
-          progress: { type: 'throbber' },
-          submit: {
-            editor_object: existingValues
-          }
-        });
-        AjaxDialog.execute();
-      } },
-      drupalEntitySelector: { callback: (type, operation, callback) => {
-        currentCallback = callback;
-
-         // Filter allowed node types.
-        var typeFilter = '';
-        var selectedType = '';
-        if (typeof type != 'undefined') {
-          var types = type.split(' ');
-          if (!selectedType) {
-            selectedType = types[0];
-          }
-          types.forEach((item) => {
+        // Filter allowed node types.
+        if (typeof bundle != 'undefined') {
+          bundle.split(' ').forEach((item) => {
+            if (!selectedType) {
+              selectedType = item;
+            }
             typeFilter += '&content_library_allowed_types[' + item + ']=' + item;
           });
         }
@@ -168,10 +146,81 @@
             title: 'Content library',
           }
         }).execute();
-      }},
-      drupalEntityPreview: { callback: (uuid, display, callback) => {
-        $.ajax('/sections/content-preview/' + uuid + '/' + display || 'default' ).done(callback);
-      }}
+      }
+
+    };
+
+    editor.addEventListener('ck-editor:media-select', function (event) {
+      handleSelect(event, 'select');
+    });
+
+    editor.addEventListener('ck-editor:media-upload', function (event) {
+      handleSelect(event, 'add');
+    });
+
+    editor.addEventListener('ck-editor:media-edit', function (event) {
+      handleSelect(event, 'edit');
+    });
+
+    editor.addEventListener('ck-editor:media-preview', function (event) {
+      if (!(event.detail.type && event.detail.type.includes(':'))) {
+        return;
+      }
+
+      var type = event.detail.type.split(':')[0];
+
+      $.ajax('/sections/' + (type === 'media' ? 'media' : 'content') + '-preview/' + event.detail.uuid + '/' + event.detail.display || 'default' )
+          .done(function (preview) { event.respond(preview); });
+    });
+
+    editor.addEventListener('ck-editor:select-link', function (event) {
+      currentCallback = function (response) {
+        event.respond(response.href);
+        currentCallback = null;
+      };
+
+      var dialogSettings = {
+        title: event.detail.target ? Drupal.t('Edit link') : Drupal.t('Add link'),
+        dialogClass: 'editor-link-dialog'
+      };
+
+      if (event.detail.target) {
+        event.detail.target = event.detail.target.split('#')[0];
+      }
+
+      var classes = dialogSettings.dialogClass ? dialogSettings.dialogClass.split(' ') : [];
+      dialogSettings.dialogClass = classes.join(' ');
+      dialogSettings.autoResize = window.matchMedia('(min-width: 600px)').matches;
+      dialogSettings.width = 'auto';
+
+      var AjaxDialog = Drupal.ajax({
+        dialog: dialogSettings,
+        dialogType: 'modal',
+        selector: '.ckeditor-dialog-loading-link',
+        url:  Drupal.url('editor/dialog/link/' + format.format),
+        progress: { type: 'throbber' },
+        submit: {
+          editor_object: {
+            href: event.detail.target
+          }
+        }
+      });
+      AjaxDialog.execute();
+    });
+
+
+    window.ckeditor5_sections_builds = window.ckeditor5_sections_builds || {};
+
+    if (!window.ckeditor5_sections_builds[editorSettings.editorBuild]) {
+      console.error('Editor build ' + editorSettings.editorBuild + " not available.");
+      return;
+    }
+
+    return window.ckeditor5_sections_builds[editorSettings.editorBuild].create(editor, {
+      masterTemplate: editorSettings.masterTemplate,
+      templates: editorSettings.templates,
+      templateAttributes: editorSettings.templateAttributes,
+      templateSession: editorSettings.templateSession,
     });
   }
 }(jQuery, Drupal));
