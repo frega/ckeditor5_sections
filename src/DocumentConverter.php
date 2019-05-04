@@ -269,8 +269,7 @@ class DocumentConverter implements DocumentConverterInterface {
           'label' => $fieldName,
           'type' => $itemtype,
         ];
-        $ck_type = $node->hasAttribute('ck-type') ? $node->getAttribute('ck-type') : '';
-        if (in_array($ck_type, ['container', 'gallery', 'tabs'])) {
+        if ($node->hasAttribute('ck-contains')) {
           $result[$parentType]['fields'][$fieldName]['cardinality'] = 'multiple';
         }
       }
