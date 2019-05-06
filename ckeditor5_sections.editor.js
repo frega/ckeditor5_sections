@@ -44,6 +44,11 @@
     $(element).hide();
 
     var editor = document.createElement('div');
+
+    editor.addEventListener('ck-editor:show-errors', function (event) {
+      event.respond(drupalSettings && drupalSettings.sections && drupalSettings.sections.errors);
+    });
+
     editor.classList.add('ck-editor');
     $(editor).insertAfter(element);
     editor.innerHTML = $(element).val();
