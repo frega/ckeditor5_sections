@@ -1,0 +1,7 @@
+name: 'CKEditor 5 Sections tests'
+type: module
+description: 'CKEditor 5 Sections tests'
+package: Testing
+core: 8.x
+dependencies:
+  - drupal:ckeditor5_sections

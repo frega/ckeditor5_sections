@@ -15,3 +15,6 @@ services:
     class: Drupal\ckeditor5_sections\Normalizer\DocumentSectionNormalizer
     tags:
     - { name: normalizer, priority: 50 }
+  plugin.manager.ckeditor5_sections.section_validation:
+    class: Drupal\ckeditor5_sections\SectionValidationPluginManager
+    parent: default_plugin_manager

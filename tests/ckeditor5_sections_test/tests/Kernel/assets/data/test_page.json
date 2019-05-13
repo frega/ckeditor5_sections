@@ -1,0 +1,35 @@
+{
+  "__type": "test_page",
+  "sections": [
+    {
+      "__type": "test_image",
+      "content": {
+        "__type": "media",
+        "data-media-type": "image",
+        "data-media-uuid": "123"
+      },
+      "caption": "Caption"
+    },
+    {
+      "__type": "test_text",
+      "headline": "Headline",
+      "content": "Content"
+    },
+    {
+      "__type": "test_teaser",
+      "headline": "Title",
+      "data-layout": "test",
+      "text": "<p>This is the content.</p>",
+      "image": {
+        "__type": "teaser-image",
+        "data-media-type": "media:image",
+        "data-media-uuid": "123"
+      },
+      "link": {
+        "__type": "button",
+        "link-target": "http://www.drupal.org",
+        "text": "Click me!!!"
+      }
+    }
+  ]
+}
