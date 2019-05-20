@@ -10,7 +10,7 @@
   },
   "link": {
     "__type": "button",
-    "href": "http://www.drupal.org",
+    "link-target": "http://www.drupal.org",
     "text": "Click me!!!"
   }
 }
