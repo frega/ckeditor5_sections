@@ -272,9 +272,13 @@ class DocumentConverter implements DocumentConverterInterface {
         // there is an itemtype, it will just be used as the type, otherwise
         // the type will be 'string'.
         $itemtype = $node->hasAttribute('itemtype') ? 'section:' . $node->getAttribute('itemtype') : 'string';
-        // Also support media entities.
-        if ($node->hasAttribute('data-media-uuid')) {
-          $itemtype ='entity:media';
+          // Also support entities.
+        if (
+          $node->hasAttribute('data-media-uuid') &&
+          $node->hasAttribute('data-media-type') &&
+          ($entity_type_id = @explode(':', trim($node->getAttribute('data-media-type')))[0])
+        ) {
+          $itemtype ='entity:' . $entity_type_id;
         }
 
         if ($node->hasAttribute('ck-contains')) {
@@ -370,11 +374,12 @@ class DocumentConverter implements DocumentConverterInterface {
             }
             $new_parent = $item_field_data;
           }
-          elseif ($value['item_type'] === 'entity:media') {
+          elseif (strpos($value['item_type'], 'entity:') === 0) {
+            $entity_type_id = substr($value['item_type'], strlen('entity:'));
             // Support media entities.
             try {
               $entities = $this->entityTypeManager
-                ->getStorage('media')
+                ->getStorage($entity_type_id)
                 ->loadByProperties([
                   'uuid' => $node->getAttribute('data-media-uuid'),
                 ]);

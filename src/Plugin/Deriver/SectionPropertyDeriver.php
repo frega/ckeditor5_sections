@@ -21,8 +21,8 @@ class SectionPropertyDeriver extends SectionDeriverBase {
           if ($propertyDefinition->isList()) {
             $type = StringHelper::listType('Section');
           }
-          elseif ($type === 'entity:media') {
-            $type = 'Media';
+          elseif (strpos($type, 'entity:') === 0) {
+            $type = StringHelper::camelCase(substr($type, strlen('entity:')));
           }
           $derivative = [
             'parents' => [StringHelper::camelCase($sectionType)],
