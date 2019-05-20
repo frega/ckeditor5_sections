@@ -17,10 +17,17 @@ class SectionPropertyDeriver extends SectionDeriverBase {
     foreach ($this->getSectionTypeDefinitions() as $sectionType => $definition) {
       if ($definition instanceof DocumentSectionDataDefinition) {
         foreach ($definition->getPropertyDefinitions() as $propertyName => $propertyDefinition) {
+          $type = $propertyDefinition->getDataType();
+          if ($propertyDefinition->isList()) {
+            $type = StringHelper::listType('Section');
+          }
+          elseif (strpos($type, 'entity:') === 0) {
+            $type = StringHelper::camelCase(substr($type, strlen('entity:')));
+          }
           $derivative = [
             'parents' => [StringHelper::camelCase($sectionType)],
             'name' => StringHelper::propCase($propertyName),
-            'type' => $propertyDefinition->isList() ? StringHelper::listType('Section') : $propertyDefinition->getDataType(),
+            'type' => $type,
             'propertyName' => $propertyName,
           ] + $basePluginDefinition;
           $this->derivatives["{$sectionType}-$propertyName"] = $derivative;

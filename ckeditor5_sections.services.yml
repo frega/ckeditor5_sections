@@ -13,6 +13,7 @@ services:
     arguments:
       - '@typed_data_manager'
       - '@ckeditor5_sections.sections_collector'
+      - '@entity_type.manager'
   ckeditor5_sections.normalizer.document_section:
     class: Drupal\ckeditor5_sections\Normalizer\DocumentSectionNormalizer
     tags:

@@ -3,6 +3,8 @@
 namespace Drupal\ckeditor5_sections;
 
 use Drupal\ckeditor5_sections\Plugin\DataType\DocumentSectionAdapter;
+use Drupal\ckeditor5_sections\TypedData\DocumentSectionDataDefinition;
+use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\TypedData\ComplexDataDefinitionInterface;
 use Drupal\Core\TypedData\ListDataDefinitionInterface;
 use Drupal\Core\TypedData\ListInterface;
@@ -25,6 +27,11 @@ class DocumentConverter implements DocumentConverterInterface {
   protected $sectionsCollector;
 
   /**
+   * @var \Drupal\Core\Entity\EntityTypeManagerInterface
+   */
+  protected $entityTypeManager;
+
+  /**
    * Maps type names to their template DOM nodes.
    * @var \DOMElement[]
    */
@@ -37,13 +44,17 @@ class DocumentConverter implements DocumentConverterInterface {
    *   A typed data manager to register new data types.
    * @param \Drupal\ckeditor5_sections\SectionsCollectorInterface $sectionsCollector
    *   The sections collector to retrieve all defined templates.
+   * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
+   *   The entity type manager.
    */
   public function __construct(
     TypedDataManagerInterface $typedDataManager,
-    SectionsCollectorInterface $sectionsCollector
+    SectionsCollectorInterface $sectionsCollector,
+    EntityTypeManagerInterface $entityTypeManager
   ) {
     $this->sectionsCollector = $sectionsCollector;
     $this->typedDataManager = $typedDataManager;
+    $this->entityTypeManager = $entityTypeManager;
   }
 
   /**
@@ -266,6 +277,15 @@ class DocumentConverter implements DocumentConverterInterface {
         // there is an itemtype, it will just be used as the type, otherwise
         // the type will be 'string'.
         $itemtype = $node->hasAttribute('itemtype') ? 'section:' . $node->getAttribute('itemtype') : 'string';
+          // Also support entities.
+        if (
+          $node->hasAttribute('data-media-uuid') &&
+          $node->hasAttribute('data-media-type') &&
+          ($entity_type_id = @explode(':', trim($node->getAttribute('data-media-type')))[0])
+        ) {
+          $itemtype ='entity:' . $entity_type_id;
+        }
+
         if ($node->hasAttribute('ck-contains')) {
           $itemtype = 'section';
         }
@@ -350,7 +370,7 @@ class DocumentConverter implements DocumentConverterInterface {
           $item_field_definition = $this->typedDataManager->createDataDefinition($value['item_type']);
           // If the field is a complex field, then we need to additionally check
           // the values of the attributes.
-          if ($item_field_definition instanceof ComplexDataDefinitionInterface) {
+          if ($item_field_definition instanceof DocumentSectionDataDefinition) {
             $item_field_data = new DocumentSection($value['item_type']);
             // Add all the attributes.
             foreach ($node->attributes as $attribute) {
@@ -361,6 +381,21 @@ class DocumentConverter implements DocumentConverterInterface {
               }
             }
             $new_parent = $item_field_data;
+          }
+          elseif (strpos($value['item_type'], 'entity:') === 0) {
+            $entity_type_id = substr($value['item_type'], strlen('entity:'));
+            // Support media entities.
+            try {
+              $entities = $this->entityTypeManager
+                ->getStorage($entity_type_id)
+                ->loadByProperties([
+                  'uuid' => $node->getAttribute('data-media-uuid'),
+                ]);
+              $item_field_data = reset($entities);
+            }
+            catch (\Exception $e) {
+              $item_field_data = NULL;
+            }
           }
           else {
             // If the field is just a simple (scalar) field, then we just dump
