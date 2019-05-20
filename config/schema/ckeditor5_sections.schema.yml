@@ -17,7 +17,8 @@ editor.settings.ckeditor5_sections:
       type: sequence
       label: 'Enabled sections'
       sequence:
-        type: integer
+        type: string
+        label: 'Enabled section'
     plugins:
       type: mapping
       label: 'Plugins'
