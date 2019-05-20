@@ -236,23 +236,28 @@ class DocumentConverter implements DocumentConverterInterface {
             'fields' => [],
           ];
         }
+
+        $internalAttributes = [];
+        // Expose some attributes as fields.
         foreach ($node->attributes as $attribute) {
           $attributeName = $attribute->nodeName;
-          // Specific attributes should be ignored.
-          if (in_array($attributeName, ['itemtype', 'itemscope', 'itemprop', 'itemexpand', 'class'])) {
+          if (
+            // Specific attributes should be ignored.
+            in_array($attributeName, ['itemtype', 'itemscope', 'itemprop', 'itemexpand', 'class']) ||
+            // Also, if the attribute name starts with 'ck-', we ignore it as
+            // well.
+            strpos($attributeName, 'ck-') === 0 ) {
+            $internalAttributes[$attributeName] = $attribute->nodeValue;
             continue;
           }
-          // Also, if the attribute name starts with 'ck-', we ignore it as
-          // well.
-          if (strpos($attributeName, 'ck-') === 0) {
-            continue;
-          }
+
           // Add the attribute as a string field.
           $result[$type]['fields'][$attributeName] = [
             'label' => $attributeName,
             'type' => 'string',
           ];
         }
+        $result[$type]['attributes'] = $internalAttributes;
       }
       // If the element has an item prop, then we actually have to add it to its
       // parent (if any).
@@ -268,11 +273,15 @@ class DocumentConverter implements DocumentConverterInterface {
         $result[$parentType]['fields'][$fieldName] = [
           'label' => $fieldName,
           'type' => $itemtype,
+          'attributes' => array_map(function(\DOMNode $attribute) {
+              return $attribute->nodeValue;
+            }, iterator_to_array($node->attributes)),
         ];
         if ($node->hasAttribute('ck-contains')) {
           $result[$parentType]['fields'][$fieldName]['cardinality'] = 'multiple';
         }
       }
+      // @todo: warn if the template can't be parsed.
     }
 
     // Process all the children of the current node, if any.

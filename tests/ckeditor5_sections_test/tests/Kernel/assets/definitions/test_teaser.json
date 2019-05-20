@@ -1,6 +1,6 @@
 {
-  "teaser": {
-    "type": "teaser",
+  "test_teaser": {
+    "type": "test_teaser",
     "fields": {
       "data-layout": {
         "label": "data-layout",
@@ -23,7 +23,9 @@
         "attributes": {
           "ck-input": "plain",
           "itemprop": "headline",
-          "class": "teaser__headline"
+          "class": "teaser__headline",
+          "ck-min": "2",
+          "ck-max": "255"
         }
       },
       "text": {
@@ -48,7 +50,7 @@
     },
     "attributes": {
       "class": "teaser",
-      "itemtype": "teaser"
+      "itemtype": "test_teaser"
     }
   },
   "teaser-image": {

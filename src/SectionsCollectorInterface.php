@@ -15,4 +15,14 @@ interface SectionsCollectorInterface {
    * @return array
    */
   public function getSections($directory = NULL);
+
+  /**
+   * Returns a list of all available section definitions (including embedded
+   * sections).
+   *
+   * @param null $directory
+   *
+   * @return array
+   */
+  public function getSectionDefinitions($directory = NULL);
 }

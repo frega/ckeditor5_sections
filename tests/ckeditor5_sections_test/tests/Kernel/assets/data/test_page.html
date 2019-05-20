@@ -1,0 +1,33 @@
+<ck-section class="page" itemtype="test_page">
+  <ck-container class="page__container" itemprop="sections">
+    <ck-section class="image" itemtype="test_image">
+      <ck-media data-media-type="image"
+                data-media-uuid="123"
+                itemprop="content"
+                itemtype="media"
+                class="image__media"
+      ></ck-media>
+      <div class="image__caption" itemprop="caption">Caption</div>
+    </ck-section>
+    <div class="text" itemtype="test_text">
+      <h2 itemprop="headline">Headline</h2>
+      <div class="text__content" itemprop="content">Content</div>
+    </div>
+    <ck-section class="teaser" itemtype="test_teaser" data-layout="test">
+      <ck-media data-media-type="media:image"
+                data-media-uuid="123"
+                itemprop="image"
+                itemtype="teaser-image"
+                class="teaser__image"
+      ></ck-media>
+
+      <div class="teaser__content">
+        <h2 itemprop="headline" class="teaser__headline">Title</h2>
+        <div itemprop="text" class="teaser__text"><p>This is the content.</p></div>
+        <ck-button itemtype="button" itemprop="link" class="teaser__link" link-target="http://www.drupal.org">
+          <div itemprop="text">Click me!!!</div>
+        </ck-button>
+      </div>
+    </ck-section>
+  </ck-container>
+</ck-section>

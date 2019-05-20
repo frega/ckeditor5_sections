@@ -61,6 +61,24 @@ class SectionsCollector implements SectionsCollectorInterface, EventSubscriberIn
   }
 
   /**
+   * Returns all sections defined in templates/sections.
+   *
+   * @param null $directory
+   * @return array
+   */
+  public function getSectionDefinitions($directory = NULL) {
+    /** @var \Drupal\ckeditor5_sections\DocumentConverter $document_converter */
+    $document_converter = \Drupal::getContainer()->get('ckeditor5_sections.document_converter');
+
+    $templates = $this->getSections();
+    $section_types = [];
+    foreach ($templates as $template) {
+      $section_types = array_merge($section_types, $document_converter->extractSectionDefinitions($template['template']));
+    }
+    return $section_types;
+  }
+
+  /**
    * {@inheritdoc}
    */
   protected function collectSectionsFromDirectory($directory) {
