@@ -2,12 +2,15 @@
 
 namespace Drupal\ckeditor5_sections;
 
+use Drupal\Core\Config\ConfigEvents;
+use Drupal\Core\Config\ConfigImporterEvent;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Symfony\Component\EventDispatcher\EventSubscriberInterface;
 
 /**
  * Sections collector service class.
  */
-class SectionsCollector implements SectionsCollectorInterface {
+class SectionsCollector implements SectionsCollectorInterface, EventSubscriberInterface {
 
   /**
    * @var \Drupal\Core\Entity\EntityTypeManagerInterface
@@ -31,7 +34,10 @@ class SectionsCollector implements SectionsCollectorInterface {
    * @return array
    *  An array of all the available sections.
    */
-  public function getSections() {
+  public function getSections($directory = NULL) {
+    if ($directory) {
+      return $this->collectSectionsFromDirectory($directory);
+    }
     if (!isset($this->sections)) {
 
       /** @var \Drupal\Core\Config\Entity\ConfigEntityStorageInterface $storage */
@@ -40,6 +46,7 @@ class SectionsCollector implements SectionsCollectorInterface {
       /** @var Editor[] $editors */
       $editors = $storage->loadByProperties([
         'editor' => 'ckeditor5_sections',
+        'status' => TRUE
       ]);
 
       /** @var \Drupal\ckeditor5_sections\SectionsCollectorInterface $collector */
@@ -71,6 +78,32 @@ class SectionsCollector implements SectionsCollectorInterface {
       ];
     }
     return $sections;
+  }
+
+  /**
+   * Fires after the configuration import.
+   *
+   * @param \Drupal\Core\Config\ConfigImporterEvent $event
+   */
+  public function afterConfigImport(ConfigImporterEvent $event) {
+    foreach ($event->getChangelist() as $list) {
+      foreach ($list as $item) {
+        if (strpos($item, 'editor.editor.') === 0) {
+          // Clear sections cache if there are changes in the editor config.
+          $this->sections = NULL;
+          break 2;
+        }
+      }
+    }
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public static function getSubscribedEvents() {
+    $events = [];
+    $events[ConfigEvents::IMPORT][] = ['afterConfigImport'];
+    return $events;
   }
 
 }

@@ -7,7 +7,7 @@
         "type": "string"
       },
       "image": {
-        "type": "section:image",
+        "type": "section:teaser-image",
         "label": "image"
       },
       "headline": {
@@ -24,8 +24,8 @@
       }
     }
   },
-  "image": {
-    "type": "image",
+  "teaser-image": {
+    "type": "teaser-image",
     "fields": {
       "data-media-type": {
         "label": "data-media-type",
@@ -40,8 +40,8 @@
   "button": {
     "type": "button",
     "fields": {
-      "href": {
-        "label": "href",
+      "link-target": {
+        "label": "link-target",
         "type": "string"
       },
       "text": {

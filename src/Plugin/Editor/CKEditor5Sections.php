@@ -15,6 +15,7 @@ use Drupal\editor\Plugin\EditorBase;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\editor\Entity\Editor;
 use Symfony\Component\DependencyInjection\ContainerInterface;
+use Drupal\media_library\MediaLibraryState;
 
 // TODO: Apply linkit conditionally.
 
@@ -166,7 +167,6 @@ class CKEditor5Sections extends EditorBase implements ContainerFactoryPluginInte
    */
   public function settingsForm(array $form, FormStateInterface $form_state, Editor $editor) {
     $settings = $editor->getSettings();
-    $sections = $this->sectionsCollector->getSections();
     $defaultDir = drupal_get_path('module', 'ckeditor5_sections') . '/sections';
     $form['templateDirectory'] = [
       '#type' => 'textfield',
@@ -184,6 +184,7 @@ class CKEditor5Sections extends EditorBase implements ContainerFactoryPluginInte
       ],
     ];
 
+    $sections = $this->sectionsCollector->getSections($form_state->getValue(['editor', 'settings', 'templateDirectory'], $settings['templateDirectory']));
     $form['rootElement'] = [
       '#prefix' => '<div id="ckeditor5-sections-template-list">',
       '#suffix' => '</div>',
@@ -283,7 +284,8 @@ class CKEditor5Sections extends EditorBase implements ContainerFactoryPluginInte
    * {@inheritdoc}
    */
   public function getLibraries(Editor $editor) {
-    return ['ckeditor5_sections/editor'];
+    $settings = $editor->getSettings();
+    return ['ckeditor5_sections/editor', $settings['editorBuild']];
   }
 
   /**
@@ -312,7 +314,7 @@ class CKEditor5Sections extends EditorBase implements ContainerFactoryPluginInte
 
     $settings['templates'] = $sections;
     $settings['templateAttributes'] = $templateAttributes;
-    $settings['templateSession'] = implode(':', [session_id(), time(), static::$instances++ ]);
+    $settings['templateSession'] = implode(':', [session_id(), time(), static::$instances++]);
     $settings['enabled_drupal_modules'] = array_keys($moduleHandler->getModuleList());
 
     $moduleHandler->alter('ckeditor5_sections_editor_settings', $settings);
