@@ -791,6 +791,15 @@
     "@ckeditor/ckeditor5-ui" "^12.1.0"
     "@ckeditor/ckeditor5-utils" "^12.1.0"
 
+"@ckeditor/ckeditor5-mention@^10.0.0":
+  version "10.0.0"
+  resolved "https://registry.yarnpkg.com/@ckeditor/ckeditor5-mention/-/ckeditor5-mention-10.0.0.tgz#24d5b8f5ec39dfb1248a49eee3f9de96b80072df"
+  integrity sha512-sjgl4T4/U3WGRkU8efOYKODGMBymNMP6G6CYFtQDbk3QltA6RF2ofNFAfCBcyPbESw5CCWAcU+35Fx03sV9i0g==
+  dependencies:
+    "@ckeditor/ckeditor5-core" "^12.1.0"
+    "@ckeditor/ckeditor5-ui" "^12.1.0"
+    "@ckeditor/ckeditor5-utils" "^12.1.0"
+
 "@ckeditor/ckeditor5-paragraph@^11.0.1":
   version "11.0.1"
   resolved "https://registry.yarnpkg.com/@ckeditor/ckeditor5-paragraph/-/ckeditor5-paragraph-11.0.1.tgz#4c82efc60c52724fb622cf05d15fae7343126f78"
@@ -970,6 +979,16 @@
   version "0.2.2"
   resolved "https://registry.yarnpkg.com/@emotion/weak-memoize/-/weak-memoize-0.2.2.tgz#63985d3d8b02530e0869962f4da09142ee8e200e"
   integrity sha512-n/VQ4mbfr81aqkx/XmVicOLjviMuy02eenSdJY33SVA7S2J42EU0P1H0mOogfYedb3wXA0d/LVtBrgTSm04WEA==
+
+"@frega/ckeditor5-drupal-mention@^10.0.10":
+  version "10.0.10"
+  resolved "https://registry.yarnpkg.com/@frega/ckeditor5-drupal-mention/-/ckeditor5-drupal-mention-10.0.10.tgz#1d82852749cd55f0be7470529d544d75deea926b"
+  integrity sha512-qP422U9n9hjikEhP7g7DcxPtNxbXOFBtQfNX1czWrv9IsS+3BBmrL6vxXJcTBmor6RS39hoZbKlCk7NgXgXRZA==
+  dependencies:
+    "@ckeditor/ckeditor5-core" "^12.1.0"
+    "@ckeditor/ckeditor5-mention" "^10.0.0"
+    "@ckeditor/ckeditor5-ui" "^12.1.0"
+    "@ckeditor/ckeditor5-utils" "^12.1.0"
 
 "@mrmlnc/readdir-enhanced@^2.2.1":
   version "2.2.1"

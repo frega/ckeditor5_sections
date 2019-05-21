@@ -22,11 +22,13 @@ import PasteFromOffice from '@ckeditor/ckeditor5-paste-from-office/src/pastefrom
 import TemplateEditing from '@amazee/ckeditor5-template/src/templateediting';
 import RemoteControl from '@amazee/ckeditor5-template/src/remotecontrol';
 import MergeEditing from "@amazee/ckeditor5-template/src/mergeediting";
+import DrupalMention from "@frega/ckeditor5-drupal-mention/src/drupalmention";
 
 export default class SectionsEditor extends BalloonEditorBase { }
 
 // Plugins to include in the build.
 SectionsEditor.builtinPlugins = [
+	DrupalMention,
 	RemoteControl,
 	Essentials,
 	PasteFromOffice,

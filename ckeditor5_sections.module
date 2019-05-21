@@ -61,3 +61,24 @@ function ckeditor5_sections_media_source_info_alter(array &$sources) {
   $sources['image']['forms']['media_library_add'] = SectionsMediaLibraryUploadForm::class;
   $sources['video_file']['forms']['media_library_add'] = SectionsMediaLibraryUploadForm::class;
 }
+
+/**
+ * Implements hook_ckeditor5_sections_editor_settings_alter().
+ */
+function ckeditor5_sections_ckeditor5_sections_editor_settings_alter(array &$settings) {
+  /** @var \Drupal\ckeditor5_sections\MentionProviderPluginManager $mention_provider */
+  $mention_provider = \Drupal::service('plugin.manager.ckeditor5_sections.mention_provider');
+  $definitions = $mention_provider->getDefinitions();
+
+  $feeds = [];
+  foreach ($definitions as $id => $definition) {
+    /** @var \Drupal\ckeditor5_sections\MentionProvider\MentionProviderInterface $plugin */
+    $plugin = $mention_provider->createInstance($id);
+    $feeds[] = [
+      'marker' => $plugin->getPluginDefinition()['prefix'],
+      'feed' => $plugin->getQueryUrl()->toString(),
+      'validCharacters' => $plugin->getValidMentionCharacters(),
+    ];
+  }
+  $settings['mention']['feeds'] = $feeds;
+}

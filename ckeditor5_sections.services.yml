@@ -21,3 +21,6 @@ services:
   plugin.manager.ckeditor5_sections.section_validation:
     class: Drupal\ckeditor5_sections\SectionValidationPluginManager
     parent: default_plugin_manager
+  plugin.manager.ckeditor5_sections.mention_provider:
+    class: Drupal\ckeditor5_sections\MentionProviderPluginManager
+    parent: default_plugin_manager

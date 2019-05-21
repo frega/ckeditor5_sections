@@ -9,6 +9,35 @@
 
   var editors = {};
 
+  /**
+   * Converts strings representing URLs to functions fetching JSON from Drupal endpoint.
+   *
+   * @param mentionSettings
+   * @returns {{feeds}}
+   */
+  function prepareMentionSettings(mentionSettings) {
+    if (mentionSettings && mentionSettings.feeds && Array.isArray(mentionSettings.feeds)) {
+      mentionSettings.feeds.forEach(function(f) {
+        // If we have a string let's wrap it in a URL fetcher.
+        if (typeof f.feed === 'string') {
+            var url = f.feed;
+            f.feed = function(query) {
+              return new Promise(function(resolve, reject) {
+                $.getJSON(url, {
+                  'q': query
+                }, function(data) {
+                  resolve(data);
+                }).fail(function(e) {
+                  reject(e);
+                });
+              });
+            };
+        }
+      });
+    }
+    return mentionSettings;
+  };
+
   Drupal.editors.ckeditor5_sections = {
     attach: function attach(element, format) {
       init(element, format).then(editor => {
@@ -226,6 +255,7 @@
       templates: editorSettings.templates,
       templateAttributes: editorSettings.templateAttributes,
       templateSession: editorSettings.templateSession,
+      mention: prepareMentionSettings(editorSettings.mention),
     });
   }
 }(jQuery, Drupal));
