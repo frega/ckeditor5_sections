@@ -471,7 +471,7 @@
           ${se}
         </button>
       </div>
-    `}selectLink(){const t={};Object.keys(this.attributes).map(e=>t[this.attributes[e].name]=this.attributes[e].value),this.requestInformation("select-link",t,t=>{null!==t.href?this.modifyDocument(e=>e.attributes(this,t)):this.modifyDocument(t=>t.removeAttribute(this,"link-target"))})}}ae.styles=dt`
+    `}selectLink(){const t={};Object.keys(this.attributes).each(e=>{this.hasAttribute(this.attributes[e].name)&&(t[this.attributes[e].name]=this.attributes[e].value)}),this.requestInformation("select-link",t,t=>{null!==t.href?this.modifyDocument(e=>{t["link-target"]=t.href,e.attributes(this,t)}):this.modifyDocument(t=>t.removeAttribute(this,"link-target"))})}}ae.styles=dt`
   :host {
     display: inline-block;
     --icon-size: 2em;
