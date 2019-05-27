@@ -74,11 +74,7 @@ function ckeditor5_sections_ckeditor5_sections_editor_settings_alter(array &$set
   foreach ($definitions as $id => $definition) {
     /** @var \Drupal\ckeditor5_sections\MentionProvider\MentionProviderInterface $plugin */
     $plugin = $mention_provider->createInstance($id);
-    $feeds[] = [
-      'marker' => $plugin->getPluginDefinition()['prefix'],
-      'feed' => $plugin->getQueryUrl()->toString(),
-      'validCharacters' => $plugin->getValidMentionCharacters(),
-    ];
+    $feeds[] = $plugin->getMentionFeedDefinition();
   }
   $settings['mention']['feeds'] = $feeds;
 }

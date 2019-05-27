@@ -14,6 +14,18 @@ abstract class BaseMentionProvider extends PluginBase implements MentionProvider
   /**
    * {@inheritdoc}
    */
+  public function getMentionFeedDefinition() {
+    return [
+      'marker' => $this->getMentionPrefix(),
+      'feed' => $this->getQueryUrl()->toString(),
+      'validCharacters' => $this->getValidMentionCharacters(),
+      'template' => $this->getMentionProviderItemTemplate(),
+    ];
+  }
+
+  /**
+   * {@inheritdoc}
+   */
   public function getQueryUrl() {
     return Url::fromRoute('ckeditor5_sections.mention.feed', [
       'mention_provider_id' => $this->getBaseId(),
@@ -52,6 +64,13 @@ abstract class BaseMentionProvider extends PluginBase implements MentionProvider
    */
   public function process($text, $langcode) {
     return new FilterProcessResult($text);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function getMentionProviderItemTemplate() {
+    return NULL;
   }
 
 }

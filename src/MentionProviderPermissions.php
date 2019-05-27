@@ -6,6 +6,9 @@ use Drupal\Core\DependencyInjection\ContainerInjectionInterface;
 use Drupal\Core\StringTranslation\StringTranslationTrait;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
+/**
+ * Defines a class for dynamic permissions based on mention provider plugins.
+ */
 class MentionProviderPermissions implements ContainerInjectionInterface {
   use StringTranslationTrait;
 
@@ -41,7 +44,8 @@ class MentionProviderPermissions implements ContainerInjectionInterface {
    * @return array
    *   Permissions array.
    *
-   * @throws
+   * @throws \Drupal\Component\Plugin\Exception\PluginException
+   *   If the instance cannot be created, such as if the ID is invalid.
    */
   public function permissions() {
     $permissions = [];
@@ -51,8 +55,8 @@ class MentionProviderPermissions implements ContainerInjectionInterface {
       $mentionProvider = $this->mentionProviderPluginManager->createInstance($plugin_id);
       $permissions += [
         'access ckeditor5 sections mention provider ' . $plugin_id => [
-          'title' => $this->t('Access CKEditor5 Sections mention provider %title', array('%title' => $mentionProvider->getPluginDefinition()['title'])),
-        ]
+          'title' => $this->t('Access CKEditor5 Sections mention provider %title', ['%title' => $mentionProvider->getPluginDefinition()['title']]),
+        ],
       ];
     }
 

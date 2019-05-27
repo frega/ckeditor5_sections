@@ -9,35 +9,6 @@
 
   var editors = {};
 
-  /**
-   * Converts strings representing URLs to functions fetching JSON from Drupal endpoint.
-   *
-   * @param mentionSettings
-   * @returns {{feeds}}
-   */
-  function prepareMentionSettings(mentionSettings) {
-    if (mentionSettings && mentionSettings.feeds && Array.isArray(mentionSettings.feeds)) {
-      mentionSettings.feeds.forEach(function(f) {
-        // If we have a string let's wrap it in a URL fetcher.
-        if (typeof f.feed === 'string') {
-            var url = f.feed;
-            f.feed = function(query) {
-              return new Promise(function(resolve, reject) {
-                $.getJSON(url, {
-                  'q': query
-                }, function(data) {
-                  resolve(data);
-                }).fail(function(e) {
-                  reject(e);
-                });
-              });
-            };
-        }
-      });
-    }
-    return mentionSettings;
-  };
-
   Drupal.editors.ckeditor5_sections = {
     attach: function attach(element, format) {
       init(element, format).then(editor => {
@@ -259,4 +230,70 @@
       mention: prepareMentionSettings(editorSettings.mention),
     });
   }
+
+  /**
+   * Registry of factory functions returning a item renderer.
+   *
+   * @type {{}}
+   */
+  Drupal.editors.ckeditor5_sections.mentionItemRendererFactories = Drupal.editors.ckeditor5_sections.mentionItemRendererFactories || {};
+
+  /**
+   * Returns a item renderer.
+   *
+   * @param mentionFeed
+   * @returns {function(*): HTMLSpanElement}
+   */
+  Drupal.editors.ckeditor5_sections.mentionItemRendererFactories.templateItemRenderer = function(mentionFeed) {
+    var template = mentionFeed.template;
+
+    return function(item) {
+      var span = document.createElement( 'span' );
+      var values = {};
+      for (var property in item) {
+        if (item.hasOwnProperty(property) && item[property] !== null) {
+          values['@' + property] = item[property];
+          values['%' + property] = item[property];
+        }
+      }
+      span.innerHTML = Drupal.t(template, values);
+      return span;
+    }
+  };
+
+  /**
+   * Converts strings representing URLs to functions fetching JSON from Drupal endpoint. Adds custom item renderer if
+   * template property present.
+   *
+   * @param mentionSettings
+   * @returns {{feeds}}
+   */
+  function prepareMentionSettings(mentionSettings) {
+    if (mentionSettings && mentionSettings.feeds && Array.isArray(mentionSettings.feeds)) {
+      mentionSettings.feeds.forEach(function(mentionFeed) {
+        // If we have a string let's wrap it in a URL fetcher.
+        if (typeof mentionFeed.feed === 'string') {
+          var url = mentionFeed.feed;
+          mentionFeed.feed = function(query) {
+            return new Promise(function(resolve, reject) {
+              $.getJSON(url, {
+                'q': query
+              }, function(data) {
+                resolve(data);
+              }).fail(function(e) {
+                reject(e);
+              });
+            });
+          };
+        }
+
+        // If there's template defined in the mention feed definition use the template item renderer.
+        if (typeof mentionFeed.template === 'string' && mentionFeed.template) {
+          mentionFeed.itemRenderer = Drupal.editors.ckeditor5_sections.mentionItemRendererFactories.templateItemRenderer(mentionFeed);
+        }
+      });
+    }
+    return mentionSettings;
+  };
+
 }(jQuery, Drupal));

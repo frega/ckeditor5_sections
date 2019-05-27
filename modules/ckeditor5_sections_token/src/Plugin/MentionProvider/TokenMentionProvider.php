@@ -163,4 +163,11 @@ class TokenMentionProvider extends BaseMentionProvider implements ContainerFacto
     return $result;
   }
 
+  /**
+   * {@inheritdoc}
+   */
+  public function getMentionProviderItemTemplate() {
+    return '@id (%label)';
+  }
+
 }
