@@ -6,4 +6,3 @@ dependencies:
   - ckeditor5_sections
   - drupal:filter
   - token:token
-  - token_filter
