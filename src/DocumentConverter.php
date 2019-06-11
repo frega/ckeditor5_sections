@@ -4,12 +4,12 @@ namespace Drupal\ckeditor5_sections;
 
 use Drupal\ckeditor5_sections\Plugin\DataType\DocumentSectionAdapter;
 use Drupal\ckeditor5_sections\TypedData\DocumentSectionDataDefinition;
+use Drupal\Component\Utility\Html;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\TypedData\ComplexDataDefinitionInterface;
 use Drupal\Core\TypedData\ListDataDefinitionInterface;
 use Drupal\Core\TypedData\ListInterface;
 use Drupal\Core\TypedData\TypedDataManagerInterface;
-use Drupal\Component\Utility\Html;
 
 /**
  * Parser class for extracting the section definitions and data from
@@ -138,17 +138,15 @@ class DocumentConverter implements DocumentConverterInterface {
           $el->appendChild($childSection);
         }
       }
-      else {
-        $fragment = $el->ownerDocument->createDocumentFragment();
-        // Normalize html.
-        $prop_value = Html::normalize($section->get($prop));
-        $fragment->appendXML('<div>' . $prop_value . '</div>');
+      else if( $value = $section->get($prop)) {
+        $prop_value = Html::normalize($value);
+        $fragment = new \DOMDocument();
+        $fragment->loadHTML($prop_value);
         foreach ($el->childNodes as $child) {
           $el->removeChild($child);
         }
-        // @todo: Test coverage.
-        foreach ($fragment->childNodes as $child) {
-          $el->appendChild($child);
+        foreach ($fragment->documentElement->lastChild->childNodes as $child) {
+          $el->appendChild($el->ownerDocument->importNode($child, TRUE));
         }
       }
     }
