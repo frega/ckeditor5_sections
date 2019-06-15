@@ -104,8 +104,8 @@ class CKEditor5Sections extends EditorBase implements ContainerFactoryPluginInte
    */
   public function __construct(
     array $configuration,
-  $plugin_id,
-  $plugin_definition,
+    $plugin_id,
+    $plugin_definition,
     ModuleHandlerInterface $module_handler,
     LanguageManagerInterface $language_manager,
     RendererInterface $renderer,
