@@ -1,20 +1,23 @@
 <?php
 
-namespace Drupal\Tests\ckeditor5_sections\Unit;
+namespace Drupal\Tests\ckeditor5_sections\Kernel;
 
 use Drupal\ckeditor5_sections\Normalizer\DocumentSectionNormalizer;
 use Drupal\KernelTests\KernelTestBase;
 
 /**
  * Tests for the Document parser class.
+ *
+ * @group ckeditor5_sections
  */
 class DocumentConverterTest extends KernelTestBase {
 
   public static $modules = [
     'ckeditor5_sections',
     'editor',
+    'media',
     'filter',
-    'serialization'
+    'serialization',
   ];
 
   /**
@@ -60,7 +63,6 @@ class DocumentConverterTest extends KernelTestBase {
   public function extractSectionDefinitionsProvider() {
     return $this->loadTestAssets('assets/definitions');
   }
-
 
   /**
    * Data provider for document conversion tests.
@@ -117,4 +119,5 @@ class DocumentConverterTest extends KernelTestBase {
     $result = $doc->saveHTML();
     $this->assertXmlStringEqualsXmlString($document, $result);
   }
+
 }

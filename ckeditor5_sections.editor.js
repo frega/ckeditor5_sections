@@ -222,13 +222,13 @@
       return;
     }
 
-    return window.ckeditor5_sections_builds[editorSettings.editorBuild].create(editor, {
+    return window.ckeditor5_sections_builds[editorSettings.editorBuild].create(editor, Object.assign({
       masterTemplate: editorSettings.masterTemplate,
       templates: editorSettings.templates,
       templateAttributes: editorSettings.templateAttributes,
       templateSession: editorSettings.templateSession,
-      mention: prepareMentionSettings(editorSettings.mention),
-    });
+      mention: prepareMentionSettings(editorSettings.mention)
+    }, editorSettings.advanced || {}));
   }
 
   /**

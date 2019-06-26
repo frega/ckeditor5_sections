@@ -4,6 +4,7 @@ namespace Drupal\ckeditor5_sections;
 
 use Drupal\ckeditor5_sections\Plugin\DataType\DocumentSectionAdapter;
 use Drupal\ckeditor5_sections\TypedData\DocumentSectionDataDefinition;
+use Drupal\Component\Utility\Html;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
 use Drupal\Core\TypedData\ComplexDataDefinitionInterface;
 use Drupal\Core\TypedData\ListDataDefinitionInterface;
@@ -33,6 +34,7 @@ class DocumentConverter implements DocumentConverterInterface {
 
   /**
    * Maps type names to their template DOM nodes.
+   *
    * @var \DOMElement[]
    */
   protected $typeNodeMap;
@@ -59,6 +61,7 @@ class DocumentConverter implements DocumentConverterInterface {
 
   /**
    * Retrieve all section type definitions.
+   *
    * @return array
    */
   public function getSectionTypeDefinitions() {
@@ -137,15 +140,15 @@ class DocumentConverter implements DocumentConverterInterface {
           $el->appendChild($childSection);
         }
       }
-      else {
-        $fragment = $el->ownerDocument->createDocumentFragment();
-        $fragment->appendXML('<div>' . $section->get($prop) . '</div>');
+      elseif ($value = $section->get($prop)) {
+        $prop_value = Html::normalize($value);
+        $fragment = new \DOMDocument();
+        $fragment->loadHTML('<?xml encoding="utf-8" ?><div>' . $prop_value . '</div>');
         foreach ($el->childNodes as $child) {
           $el->removeChild($child);
         }
-
-        foreach ($fragment->firstChild->childNodes as $child) {
-          $el->appendChild($child);
+        foreach ($fragment->documentElement->lastChild->lastChild->childNodes as $child) {
+          $el->appendChild($el->ownerDocument->importNode($child, TRUE));
         }
       }
     }
@@ -171,7 +174,6 @@ class DocumentConverter implements DocumentConverterInterface {
     // attributes are converted to properties according to
     // https://developer.mozilla.org/en-US/docs/Web/API/HTMLElement/dataset
     // @todo: handle the case when the same item type appears more times, and check for recursion.
-
     // 2. If the element has an 'itemprop' then this is treated like a property
     // (field) and attached to the parent type (it will be basically the first
     // ancestor element which has an itemtype). If there is not parent, then the
@@ -179,7 +181,6 @@ class DocumentConverter implements DocumentConverterInterface {
     // The type of the fields depends on the 'itemtype' property of the element.
     // If the 'itemtype' is empty, then the type will be set to string. If there
     // is an 'itemtype' then this will become the type of the field.
-
     $dom = new \DOMDocument();
     // Load the document and convert the encoding to HTML-ENTITIES, see
     // https://davidwalsh.name/domdocument-utf8-problem
@@ -208,10 +209,10 @@ class DocumentConverter implements DocumentConverterInterface {
   public function extractSectionData($document) {
     $dom = new \DOMDocument();
     $dom->loadHTML(mb_convert_encoding($document, 'HTML-ENTITIES', 'UTF-8'), LIBXML_NOERROR);
-    //$list_definition = \Drupal::typedDataManager()->createListDataDefinition('section');
-    //$result = \Drupal::typedDataManager()->create($list_definition);
+    // $list_definition = \Drupal::typedDataManager()->createListDataDefinition('section');
+    // $result = \Drupal::typedDataManager()->create($list_definition);
     $result = [];
-    if($dom->documentElement->hasAttribute('itemtype')) {
+    if ($dom->documentElement->hasAttribute('itemtype')) {
       throw new \Exception('Data extraction requires type definition at root.');
     }
     $this->buildSectionData($dom, $result);
@@ -222,9 +223,9 @@ class DocumentConverter implements DocumentConverterInterface {
    * Recursively traverses a dom and extracts the section definitions.
    *
    * @param \DOMNode $node
-   *  The node currently being processed.
+   *   The node currently being processed.
    * @param $result
-   *  The extraction result.
+   *   The extraction result.
    */
   protected function buildSectionDefinitions(\DOMNode $node, &$result, $parentType = '') {
     // If the current node is a DOMElement, process it.
@@ -257,15 +258,21 @@ class DocumentConverter implements DocumentConverterInterface {
             in_array($attributeName, ['itemtype', 'itemscope', 'itemprop', 'itemexpand', 'class']) ||
             // Also, if the attribute name starts with 'ck-', we ignore it as
             // well.
-            strpos($attributeName, 'ck-') === 0 ) {
+            strpos($attributeName, 'ck-') === 0) {
             $internalAttributes[$attributeName] = $attribute->nodeValue;
             continue;
           }
-
           // Add the attribute as a string field.
           $result[$type]['fields'][$attributeName] = [
             'label' => $attributeName,
             'type' => 'string',
+          ];
+        }
+        if (array_key_exists('data-media-type', $result[$type]['fields'])) {
+          $entity_type_id = @explode(':', trim($node->getAttribute('data-media-type')))[0];
+          $result[$type]['fields']['entity'] = [
+            'type' => 'entity:' . $entity_type_id,
+            'label' => $entity_type_id . ' Entity',
           ];
         }
         $result[$type]['attributes'] = $internalAttributes;
@@ -273,30 +280,33 @@ class DocumentConverter implements DocumentConverterInterface {
       // If the element has an item prop, then we actually have to add it to its
       // parent (if any).
       if ($node->hasAttribute('itemprop') && !empty($parentType)) {
+        $attributes = [];
         // The type of the field depends actually on the itemtype property. If
         // there is an itemtype, it will just be used as the type, otherwise
         // the type will be 'string'.
         $itemtype = $node->hasAttribute('itemtype') ? 'section:' . $node->getAttribute('itemtype') : 'string';
-          // Also support entities.
+        $fieldName = $node->getAttribute('itemprop');
+
+        // Also support entities. Add a field 'entity'.
         if (
           $node->hasAttribute('data-media-uuid') &&
           $node->hasAttribute('data-media-type') &&
           ($entity_type_id = @explode(':', trim($node->getAttribute('data-media-type')))[0])
         ) {
-          $itemtype ='entity:' . $entity_type_id;
+          $attributes['entity'] = 'entity:' . $entity_type_id;
         }
 
         if ($node->hasAttribute('ck-contains')) {
           $itemtype = 'section';
         }
-        $fieldName = $node->getAttribute('itemprop');
         $result[$parentType]['fields'][$fieldName] = [
           'label' => $fieldName,
           'type' => $itemtype,
-          'attributes' => array_map(function(\DOMNode $attribute) {
+          'attributes' => array_merge(array_map(function (\DOMNode $attribute) {
               return $attribute->nodeValue;
-            }, iterator_to_array($node->attributes)),
+          }, iterator_to_array($node->attributes)), $attributes),
         ];
+
         if ($node->hasAttribute('ck-contains')) {
           $result[$parentType]['fields'][$fieldName]['cardinality'] = 'multiple';
         }
@@ -373,12 +383,32 @@ class DocumentConverter implements DocumentConverterInterface {
           if ($item_field_definition instanceof DocumentSectionDataDefinition) {
             $item_field_data = new DocumentSection($value['item_type']);
             // Add all the attributes.
+            $entityType = '';
             foreach ($node->attributes as $attribute) {
               $attributeName = $attribute->nodeName;
               // Add the attribute to the current value.
               if ($item_field_definition->getPropertyDefinition($attributeName)) {
                 $item_field_data->set($attributeName, $node->getAttribute($attribute->nodeName));
               }
+              if ($attributeName == 'data-media-type') {
+                $entityType = $node->getAttribute($attribute->nodeName);
+              }
+            }
+
+            if ($item_field_definition->getPropertyDefinition('entity')) {
+              $entity_type_id = @explode(':', trim($entityType))[0];
+              try {
+                $entities = $this->entityTypeManager
+                  ->getStorage($entity_type_id)
+                  ->loadByProperties([
+                    'uuid' => $node->getAttribute('data-media-uuid'),
+                  ]);
+                $entity = reset($entities);
+              }
+              catch (\Exception $e) {
+                $entity = NULL;
+              }
+              $item_field_data->set('entity', $entity);
             }
             $new_parent = $item_field_data;
           }
@@ -392,6 +422,9 @@ class DocumentConverter implements DocumentConverterInterface {
                   'uuid' => $node->getAttribute('data-media-uuid'),
                 ]);
               $item_field_data = reset($entities);
+              if (!$item_field_data) {
+                $item_field_data = NULL;
+              }
             }
             catch (\Exception $e) {
               $item_field_data = NULL;
@@ -438,7 +471,10 @@ class DocumentConverter implements DocumentConverterInterface {
   // did not work properly when having lists of items. So for now we just use
   // the above implementation which uses the typed data information to retrieve
   // the metadata about the fields, but the values themselves are stored in
-  // DocumentSection objects.
+
+  /**
+   * DocumentSection objects.
+   */
   public function __buildSectionData(\DOMNode $node, ListInterface $result, DocumentSectionAdapter $parent = NULL) {
     $new_result = $result;
     $new_parent = $parent;
@@ -546,9 +582,10 @@ class DocumentConverter implements DocumentConverterInterface {
    * Returns the inner html of a DOM node.
    *
    * @param \DOMNode $node
-   *  The DOM node.
+   *   The DOM node.
+   *
    * @return string
-   *  The html result.
+   *   The html result.
    */
   protected function getDOMInnerHtml(\DOMNode $node) {
     $innerHTML = "";
@@ -557,4 +594,5 @@ class DocumentConverter implements DocumentConverterInterface {
     }
     return $innerHTML;
   }
+
 }

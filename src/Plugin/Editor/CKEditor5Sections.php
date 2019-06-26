@@ -15,12 +15,9 @@ use Drupal\editor\Plugin\EditorBase;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\editor\Entity\Editor;
 use Symfony\Component\DependencyInjection\ContainerInterface;
-use Drupal\media_library\MediaLibraryState;
 
 // TODO: Apply linkit conditionally.
-
 // TODO: Make the default root work.
-
 // TODO: Remove all unused services from this file.
 
 /**
@@ -106,7 +103,9 @@ class CKEditor5Sections extends EditorBase implements ContainerFactoryPluginInte
    * @throws \Drupal\Component\Plugin\Exception\InvalidPluginDefinitionException
    */
   public function __construct(
-    array $configuration, $plugin_id, $plugin_definition,
+    array $configuration,
+    $plugin_id,
+    $plugin_definition,
     ModuleHandlerInterface $module_handler,
     LanguageManagerInterface $language_manager,
     RendererInterface $renderer,
@@ -122,7 +121,8 @@ class CKEditor5Sections extends EditorBase implements ContainerFactoryPluginInte
     $this->sectionsCollector = $sections_collector;
     try {
       $this->linkitProfileStorage = $entityTypeManager->getStorage('linkit_profile');
-    } catch (PluginNotFoundException $exc) {
+    }
+    catch (PluginNotFoundException $exc) {
       // Ignore this case. LinkIt is probably not be installed.
     }
   }
@@ -157,8 +157,9 @@ class CKEditor5Sections extends EditorBase implements ContainerFactoryPluginInte
         'drupallink' => [
           'linkit_enabled' => TRUE,
           'linkit_profile' => 'default',
-        ]
+        ],
       ],
+      'advanced' => '{}',
     ];
   }
 
@@ -192,7 +193,7 @@ class CKEditor5Sections extends EditorBase implements ContainerFactoryPluginInte
       '#title' => $this->t('Root Element'),
       '#options' => ['__default' => t('Default Root Element')] + array_map(function ($section) {
           return $section['label'];
-        }, $sections),
+      }, $sections),
       '#default_value' => $settings['rootElement'],
     ];
 
@@ -271,7 +272,25 @@ class CKEditor5Sections extends EditorBase implements ContainerFactoryPluginInte
       ];
     }
 
+    $form['advanced'] = [
+      '#type' => 'textarea',
+      '#title' => $this->t('Advanced configuration'),
+      '#description' => $this->t('JSON configuration object that will be passed to the editor instance. See: <a href="https://ckeditor.com/docs/ckeditor5/latest/builds/guides/integration/configuration.html">CKEditor5 Documentation</a>'),
+      '#default_value' => $settings['advanced'],
+    ];
+
     return $form;
+  }
+
+  /**
+   * {@inheritDoc}
+   */
+  public function settingsFormValidate(array $form, FormStateInterface $form_state) {
+    parent::settingsFormValidate($form, $form_state);
+    $advanced = $form_state->getValue(['editor', 'settings', 'advanced']);
+    if (is_null(json_decode($advanced))) {
+      $form_state->setErrorByName('editor][settings][advanced', $this->t('Advanced configuration is not valid JSON.'));
+    }
   }
 
   public static function templateListAjax($form, FormStateInterface $form_state) {
@@ -318,6 +337,7 @@ class CKEditor5Sections extends EditorBase implements ContainerFactoryPluginInte
     $settings['enabled_drupal_modules'] = array_keys($moduleHandler->getModuleList());
 
     $moduleHandler->alter('ckeditor5_sections_editor_settings', $settings);
+    $settings['advanced'] = isset($settings['advanced']) ? json_decode($settings['advanced'], TRUE) : [];
 
     return $settings;
   }
