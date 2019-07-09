@@ -16,11 +16,13 @@ class TextWithSummaryAndSectionsItem extends TextWithSummaryItem {
       ->setLabel(t('Sections'))
       ->setDescription(t('The extracted sections of the field.'))
       ->setComputed(TRUE)
+      ->addConstraint('SectionConflict')
       ->setClass(DocumentSectionsExtractor::class)
       ->setSetting('text source', 'value')
       ->setDataType('section')
       ->setInternal(FALSE);
 
+    $properties['value']->addConstraint('SectionConflict');
     return $properties;
   }
 
