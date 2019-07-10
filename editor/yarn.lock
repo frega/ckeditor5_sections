@@ -4,7 +4,7 @@
 
 "@amazee/ckeditor5-template@https://github.com/AmazeeLabs/ckeditor5-template":
   version "0.0.27"
-  resolved "https://github.com/AmazeeLabs/ckeditor5-template#94bf28d5694b873c2c26dcd53150d80e50e9aa75"
+  resolved "https://github.com/AmazeeLabs/ckeditor5-template#f05157448a81c954ef66524d6885496c7c48fa0d"
   dependencies:
     "@ckeditor/ckeditor5-core" "^12.0.0"
     "@ckeditor/ckeditor5-engine" "^13.1.0"
