@@ -21,6 +21,7 @@ class TextLongWithSectionsItem extends TextLongItem {
       ->setDataType('section')
       ->setInternal(FALSE);
 
+    $properties['value']->addConstraint('SectionConflict');
     return $properties;
   }
 
