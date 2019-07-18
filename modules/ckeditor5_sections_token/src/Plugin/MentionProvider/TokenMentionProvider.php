@@ -129,7 +129,7 @@ class TokenMentionProvider extends BaseMentionProvider implements ContainerFacto
       }
     }
     // @todo: sort and make sure only the most relevant (10?) are returned.
-    return array_values($results);
+    return array_slice(array_values($results), 0, 20);
   }
 
   /**
