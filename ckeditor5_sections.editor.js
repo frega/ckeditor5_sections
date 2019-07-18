@@ -138,11 +138,12 @@
               selectedType = item;
             }
             typeFilter += '&content_library_allowed_types[' + item + ']=' + item;
+            typeFilter += '&media_library_allowed_types[' + item + ']=' + item;
           });
         }
 
         Drupal.ajax({
-          url: Drupal.url('admin/content/content-widget?content_library_widget_id=' + $(element).attr('id') + typeFilter + '&return_type=uuid&media_library_selected_type=' + selectedType + '&media_library_remaining=1' ),
+          url: Drupal.url('admin/content/content-widget?field_id=' + $(element).attr('id') + '&content_library_widget_id=' + $(element).attr('id') + typeFilter + '&return_type=uuid&media_library_selected_type=' + selectedType + '&media_library_remaining=1' ),
           dialogType: 'modal',
           dialog: {
             dialogClass: 'media-library-widget-modal',
