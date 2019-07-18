@@ -27,3 +27,6 @@ services:
   plugin.manager.ckeditor5_sections.mention_provider:
     class: Drupal\ckeditor5_sections\MentionProviderPluginManager
     parent: default_plugin_manager
+  media_library.opener.sections:
+    class: Drupal\ckeditor5_sections\SectionsMediaLibraryOpener
+    arguments: ['@entity_type.manager']
