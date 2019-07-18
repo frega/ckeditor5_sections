@@ -2,15 +2,18 @@
 
 namespace Drupal\ckeditor5_sections_token\Plugin\MentionProvider;
 
+use Drupal\ckeditor5_sections\Annotation\MentionProvider;
 use Drupal\ckeditor5_sections\MentionProvider\BaseMentionProvider;
 use Drupal\ckeditor5_sections\MentionProvider\MentionProviderItem;
 use Drupal\Component\Utility\Html;
 use Drupal\Core\Entity\ContentEntityInterface;
+use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\Plugin\ContainerFactoryPluginInterface;
 use Drupal\Core\Render\BubbleableMetadata;
 use Drupal\Core\Utility\Token;
 use Drupal\filter\FilterProcessResult;
 use Drupal\token\TokenEntityMapperInterface;
+use Drupal\token\TreeBuilderInterface;
 use Symfony\Component\DependencyInjection\ContainerInterface;
 
 /**
@@ -40,12 +43,32 @@ class TokenMentionProvider extends BaseMentionProvider implements ContainerFacto
   protected $tokenEntityMapper;
 
   /**
+   * @var \Drupal\token\TreeBuilderInterface
+   */
+  protected $treeBuilder;
+
+  /**
+   * @var \Drupal\Core\Extension\ModuleHandlerInterface
+   */
+  protected $moduleHandler;
+
+  /**
    * {@inheritdoc}
    */
-  public function __construct(array $configuration, $plugin_id, $plugin_definition, Token $token, TokenEntityMapperInterface $token_entity_mapper) {
+  public function __construct(
+    array $configuration,
+    $plugin_id,
+    $plugin_definition,
+    Token $token,
+    TokenEntityMapperInterface $token_entity_mapper,
+    TreeBuilderInterface $treeBuilder,
+    ModuleHandlerInterface $moduleHandler
+  ) {
     parent::__construct($configuration, $plugin_id, $plugin_definition);
     $this->token = $token;
     $this->tokenEntityMapper = $token_entity_mapper;
+    $this->treeBuilder = $treeBuilder;
+    $this->moduleHandler = $moduleHandler;
   }
 
   /**
@@ -57,7 +80,9 @@ class TokenMentionProvider extends BaseMentionProvider implements ContainerFacto
       $plugin_id,
       $plugin_definition,
       $container->get('token'),
-      $container->get('token.entity_mapper')
+      $container->get('token.entity_mapper'),
+      $container->get('token.tree_builder'),
+      $container->get('module_handler')
     );
   }
 
@@ -65,30 +90,40 @@ class TokenMentionProvider extends BaseMentionProvider implements ContainerFacto
    * {@inheritdoc}
    */
   public function query($queryText) {
-    $queryText = substr(mb_strtolower($queryText), 1);
-    if (strpos($queryText, ':') !== FALSE) {
-      list($queryGroup, $queryText) = explode(':', $queryText);
-    }
-    else {
-      $queryGroup = FALSE;
-    }
+    $queryText = mb_strtolower($queryText);
+    $querySegments = explode(':', $queryText);
+    $queryGroup = array_shift($querySegments);
+    $queryToken = array_shift($querySegments);
+    $queryChildren = $querySegments ? implode(':', $querySegments) : FALSE;
 
     $info = $this->token->getInfo();
     $results = [];
     $prefix = $this->getPluginDefinition()['prefix'];
+    $this->moduleHandler->alter('mention_token_info', $info);
     foreach ($info['tokens'] as $group => $tokens) {
-      if (!$queryGroup || $queryGroup == $group) {
+      if (mb_strpos($group, $queryGroup) !== FALSE) {
         foreach ($tokens as $token_key => $token) {
-          if (
-            // Matching the group name.
-            ($queryText && mb_strpos($group, $queryText) !== FALSE) ||
-            // Matching the token key.
-            ($queryText && mb_strpos($token_key, $queryText) !== FALSE) ||
-            // Or match all in the group, if there's a direct match on group.
-            (empty($queryText) && $group === $queryGroup)
-          ) {
+          if (!$queryToken || mb_strpos($token_key, $queryToken) !== FALSE) {
             $id = $prefix . $group . ':' . $token_key;
-            $results[$id] = new MentionProviderItem($id, (string) $token['name']);
+            if (array_key_exists('type', $token)) {
+              $tree = $this->treeBuilder->buildTree($token['type']);
+              $flattened = $this->treeBuilder->flattenTree($tree);
+              $leaves = array_filter($flattened, function ($node) {
+                return !array_key_exists('children', $node);
+              });
+              foreach ($leaves as $lid => $leaf) {
+                if (
+                  !$queryChildren ||
+                  substr($leaf['token'], 0, strlen($queryChildren)) === $queryChildren
+                ) {
+                  $ltid = '@' . $group . ':' . $token_key . ':' . $leaf['token'];
+                  $results[$ltid] = new MentionProviderItem($ltid, (string) $leaf['name']);
+                }
+              }
+            }
+            else {
+              $results[$id] = new MentionProviderItem($id, (string) $token['name']);
+            }
           }
         }
       }
