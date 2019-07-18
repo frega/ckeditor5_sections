@@ -72,9 +72,9 @@ export default class TextElement extends Plugin {
 				} );
 			}
 			if ( element.configuration.input === 'plain' ) {
-				this.editor.model.schema.addAttributeCheck( context => {
+				this.editor.model.schema.addAttributeCheck( (context, attributeName) => {
 					if ( context.endsWith( `${ element.name } $text` ) ) {
-						return false;
+						return attributeName === 'mention';
 					}
 				} );
 			}
