@@ -65,7 +65,7 @@ class TokenMentionProvider extends BaseMentionProvider implements ContainerFacto
    * {@inheritdoc}
    */
   public function query($queryText) {
-    $queryText = mb_strtolower($queryText);
+    $queryText = substr(mb_strtolower($queryText), 1);
     if (strpos($queryText, ':') !== FALSE) {
       list($queryGroup, $queryText) = explode(':', $queryText);
     }

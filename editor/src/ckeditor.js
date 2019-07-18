@@ -16,18 +16,18 @@ import Table from '@ckeditor/ckeditor5-table/src/table';
 import TableToolbar from '@ckeditor/ckeditor5-table/src/tabletoolbar';
 import BlockToolbar from '@ckeditor/ckeditor5-ui/src/toolbar/block/blocktoolbar';
 import PasteFromOffice from '@ckeditor/ckeditor5-paste-from-office/src/pastefromoffice';
+import Mention from '@ckeditor/ckeditor5-mention/src/mention';
 
 import Template from '../packages/ckeditor5-template/src/template';
 import TemplateEditing from '../packages/ckeditor5-template/src/templateediting';
 import RemoteControl from '../packages/ckeditor5-template/src/remotecontrol';
 import MergeEditing from "../packages/ckeditor5-template/src/mergeediting";
-import DrupalMention from "../packages/ckeditor5-drupal-mention/src/drupalmention";
 
 export default class SectionsEditor extends BalloonEditorBase { }
 
 // Plugins to include in the build.
 SectionsEditor.builtinPlugins = [
-	DrupalMention,
+	Mention,
 	RemoteControl,
 	Essentials,
 	PasteFromOffice,
