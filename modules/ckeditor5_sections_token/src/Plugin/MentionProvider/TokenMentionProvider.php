@@ -172,11 +172,9 @@ class TokenMentionProvider extends BaseMentionProvider implements ContainerFacto
     $result = new FilterProcessResult();
     /** @var \DOMElement $element */
     foreach ($xpath->query($this->getXpathQueryForMentionElements()) as $element) {
-      $element->textContent = $this->getTokenFromMentionValue($element->getAttribute('data-mention'));
-      // @todo: clarify if we really want to strip these attributes?
-      $element->removeAttribute('data-mention');
-      $element->removeAttribute('class');
-      // @todo: do we want to *convert* the <span>-element to something else?
+      $textNode = $dom->createTextNode($this->getTokenFromMentionValue($element->getAttribute('data-mention')));
+      $element->parentNode->insertBefore($textNode, $element);
+      $element->parentNode->removeChild($element);
     }
 
     // Serialize the altered DOM back to string representation.
@@ -184,6 +182,7 @@ class TokenMentionProvider extends BaseMentionProvider implements ContainerFacto
 
     // @note: this is copied from drupal/token_filter.
     $entity = drupal_static('ckeditor5_sections_token_filter_entity', NULL);
+    $data = [];
     if (!is_null($entity) && $entity instanceof ContentEntityInterface) {
       $token_type = $this->tokenEntityMapper->getTokenTypeForEntityType($entity->getEntityTypeId());
       $data[$token_type] = $entity;
