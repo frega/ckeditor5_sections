@@ -27,7 +27,7 @@ class SectionsEditorWidget extends StringTextareaWidget {
 
     $element = $main_widget['value'];
     $element['#type'] = 'text_format';
-    $element['#format'] = $items[$delta]->format;
+    $element['#format'] = 'sections_data';
     $element['#base_type'] = $main_widget['value']['#type'];
     for ($i = 0; $i < $items->count(); $i++) {
       $element['#attached']['drupalSettings']['ckeditor5_sections']['masterTemplates'][$items->getName() . '[' . $i . '][value]'] = $items->getSetting('template');
