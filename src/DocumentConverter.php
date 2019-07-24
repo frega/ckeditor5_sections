@@ -6,6 +6,7 @@ use Drupal\ckeditor5_sections\Plugin\DataType\DocumentSectionAdapter;
 use Drupal\ckeditor5_sections\TypedData\DocumentSectionDataDefinition;
 use Drupal\Component\Utility\Html;
 use Drupal\Core\Entity\EntityTypeManagerInterface;
+use Drupal\Core\Extension\ModuleHandlerInterface;
 use Drupal\Core\TypedData\ComplexDataDefinitionInterface;
 use Drupal\Core\TypedData\ListDataDefinitionInterface;
 use Drupal\Core\TypedData\ListInterface;
@@ -40,6 +41,18 @@ class DocumentConverter implements DocumentConverterInterface {
   protected $typeNodeMap;
 
   /**
+   * @var \Drupal\Core\Extension\ModuleHandlerInterface
+   */
+  protected $moduleHandler;
+
+  /**
+   * The template directory.
+   *
+   * @var string[]
+   */
+  protected $templateDirectory;
+
+  /**
    * DocumentConverter constructor.
    *
    * @param \Drupal\Core\TypedData\TypedDataManagerInterface $typedDataManager
@@ -48,25 +61,33 @@ class DocumentConverter implements DocumentConverterInterface {
    *   The sections collector to retrieve all defined templates.
    * @param \Drupal\Core\Entity\EntityTypeManagerInterface $entityTypeManager
    *   The entity type manager.
+   * @param \Drupal\Core\Extension\ModuleHandlerInterface $moduleHandler
+   *   The module handler to invoke alter hooks on type definitions.
+   * @param string $templateDirectory
+   *   The template directory to use.
    */
   public function __construct(
     TypedDataManagerInterface $typedDataManager,
     SectionsCollectorInterface $sectionsCollector,
-    EntityTypeManagerInterface $entityTypeManager
+    EntityTypeManagerInterface $entityTypeManager,
+    ModuleHandlerInterface $moduleHandler,
+    $templateDirectory
   ) {
     $this->sectionsCollector = $sectionsCollector;
     $this->typedDataManager = $typedDataManager;
     $this->entityTypeManager = $entityTypeManager;
+    $this->moduleHandler = $moduleHandler;
+    $this->templateDirectory = $templateDirectory ?: drupal_get_path('module', 'ckeditor5_sections') . '/sections';
   }
 
   /**
-   * Retrieve all section type definitions.
+   * Retrieve all section type definitions
    *
    * @return array
    */
   public function getSectionTypeDefinitions() {
-    $templates = $this->sectionsCollector->getSections();
     $section_types = [];
+    $templates = $this->sectionsCollector->getSections($this->templateDirectory);
     foreach ($templates as $template) {
       $section_types = array_merge($section_types, $this->extractSectionDefinitions($template['template']));
     }
@@ -187,6 +208,7 @@ class DocumentConverter implements DocumentConverterInterface {
     $dom->loadHTML(mb_convert_encoding($document, 'HTML-ENTITIES', 'UTF-8'), LIBXML_NOERROR);
     $result = [];
     $this->buildSectionDefinitions($dom, $result);
+    $this->moduleHandler->alter('section_type_definitions', $result);
     return $result;
   }
 
@@ -267,13 +289,9 @@ class DocumentConverter implements DocumentConverterInterface {
             'label' => $attributeName,
             'type' => 'string',
           ];
-        }
-        if (array_key_exists('data-media-type', $result[$type]['fields'])) {
-          $entity_type_id = @explode(':', trim($node->getAttribute('data-media-type')))[0];
-          $result[$type]['fields']['entity'] = [
-            'type' => 'entity:' . $entity_type_id,
-            'label' => $entity_type_id . ' Entity',
-          ];
+          if ($attribute->nodeValue) {
+            $result[$type]['fields'][$attributeName]['default'] = $attribute->nodeValue;
+          }
         }
         $result[$type]['attributes'] = $internalAttributes;
       }
@@ -286,15 +304,6 @@ class DocumentConverter implements DocumentConverterInterface {
         // the type will be 'string'.
         $itemtype = $node->hasAttribute('itemtype') ? 'section:' . $node->getAttribute('itemtype') : 'string';
         $fieldName = $node->getAttribute('itemprop');
-
-        // Also support entities. Add a field 'entity'.
-        if (
-          $node->hasAttribute('data-media-uuid') &&
-          $node->hasAttribute('data-media-type') &&
-          ($entity_type_id = @explode(':', trim($node->getAttribute('data-media-type')))[0])
-        ) {
-          $attributes['entity'] = 'entity:' . $entity_type_id;
-        }
 
         if ($node->hasAttribute('ck-contains')) {
           $itemtype = 'section';
@@ -395,21 +404,6 @@ class DocumentConverter implements DocumentConverterInterface {
               }
             }
 
-            if ($item_field_definition->getPropertyDefinition('entity')) {
-              $entity_type_id = @explode(':', trim($entityType))[0];
-              try {
-                $entities = $this->entityTypeManager
-                  ->getStorage($entity_type_id)
-                  ->loadByProperties([
-                    'uuid' => $node->getAttribute('data-media-uuid'),
-                  ]);
-                $entity = reset($entities);
-              }
-              catch (\Exception $e) {
-                $entity = NULL;
-              }
-              $item_field_data->set('entity', $entity);
-            }
             $new_parent = $item_field_data;
           }
           elseif (strpos($value['item_type'], 'entity:') === 0) {
@@ -520,7 +514,7 @@ class DocumentConverter implements DocumentConverterInterface {
           $update_new_result = TRUE;
         }
         else {
-          $item_field_definition = $this->typedDataManager->createDataDefinition($value['item_type']);
+          $item_field_definition = $this->typedDataManager->createDataDefinition('section:' . $value['item_type']);
           // If the field is a complex field, then we need to additionally check
           // the values of the attributes.
           if ($item_field_definition instanceof ComplexDataDefinitionInterface) {

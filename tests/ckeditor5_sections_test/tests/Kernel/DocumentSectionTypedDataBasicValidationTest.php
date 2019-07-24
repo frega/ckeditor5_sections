@@ -3,10 +3,12 @@
 namespace Drupal\Tests\ckeditor5_sections_test\Unit;
 
 use Drupal\ckeditor5_sections\Plugin\Validation\Constraint\SectionTypeConstraint;
+use Drupal\Core\DependencyInjection\ContainerBuilder;
 use Drupal\Core\Validation\Plugin\Validation\Constraint\CountConstraint;
 use Drupal\Core\Validation\Plugin\Validation\Constraint\LengthConstraint;
+use Drupal\field\Entity\FieldConfig;
+use Drupal\field\Entity\FieldStorageConfig;
 use Drupal\KernelTests\KernelTestBase;
-use Symfony\Component\Validator\Constraints\Count;
 use Symfony\Component\Validator\Constraints\NotBlank;
 
 /**
@@ -22,6 +24,8 @@ class DocumentSectionTypedDataBasicValidationTest extends KernelTestBase {
   protected $typedDataManager;
 
   public static $modules = [
+    'system',
+    'field',
     'ckeditor5_sections_test',
     'ckeditor5_sections',
     'editor',
@@ -34,6 +38,11 @@ class DocumentSectionTypedDataBasicValidationTest extends KernelTestBase {
     'image',
   ];
 
+  public function register(ContainerBuilder $container) {
+    parent::register($container);
+    $this->container->setParameter('ckeditor5_sections.template_directory', realpath(__DIR__ . '/../../sections'));
+  }
+
   /**
    * Test setup.
    */
@@ -43,23 +52,6 @@ class DocumentSectionTypedDataBasicValidationTest extends KernelTestBase {
     $this->installConfig(['ckeditor5_sections_test']);
 
     $this->typedDataManager = \Drupal::service('typed_data_manager');
-    // @todo: use a more "default" discovery method (plugins / annototions?
-    // {module_name}.sections.yml-file.
-    /** @var \Drupal\Core\Config\Entity\ConfigEntityStorageInterface $storage */
-    $storage = \Drupal::entityTypeManager()->getStorage('editor');
-
-    /** @var \Drupal\editor\Entity\Editor[] $editors */
-    $editors = $storage->loadByProperties([
-      'editor' => 'ckeditor5_sections',
-      'status' => TRUE,
-    ]);
-
-    // Set the templateDirectory.
-    $editor = $editors['ckeditor5_sections_test'];
-    $settings = $editor->getSettings();
-    $settings['templateDirectory'] = realpath(__DIR__ . '/../../sections');
-    $editor->setSettings($settings);
-    $editor->save();
 
     $this->installEntitySchema('media');
     $this->installEntitySchema('media_type');

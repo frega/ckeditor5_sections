@@ -40,11 +40,11 @@ class DocumentSectionTest extends UnitTestCase {
   public function testSetComplexData() {
     $section = new DocumentSection('foo');
     $section->set('bar', [
-      '__type' => 'baz',
+      '__type' => 'section:baz',
     ]);
     $value = $section->get('bar');
     $this->assertInstanceOf(DocumentSection::class, $value);
-    $this->assertEquals('baz', $value->getType());
+    $this->assertEquals('section:baz', $value->getType());
   }
 
   public function testSetList() {
@@ -63,33 +63,33 @@ class DocumentSectionTest extends UnitTestCase {
   public function testFromListValue() {
     $section = DocumentSection::fromValue([
       [
-        '__type' => 'baz',
+        '__type' => 'section:baz',
       ]
     ]);
 
     $this->assertTrue(is_array($section));
     $this->assertInstanceOf(DocumentSection::class, $section[0]);
-    $this->assertEquals('baz', $section[0]->getType());
+    $this->assertEquals('section:baz', $section[0]->getType());
   }
 
   public function testFromComplexValue() {
     $section = DocumentSection::fromValue([
-      '__type' => 'foo',
+      '__type' => 'section:foo',
     ]);
     $this->assertInstanceOf(DocumentSection::class, $section);
-    $this->assertEquals('foo', $section->getType());
+    $this->assertEquals('section:foo', $section->getType());
   }
 
   public function testFromNestedValue() {
     $section = DocumentSection::fromValue([
-      '__type' => 'foo',
+      '__type' => 'section:foo',
       'bar' => [
-        '__type' => 'baz',
+        '__type' => 'section:baz',
       ],
     ]);
     $this->assertInstanceOf(DocumentSection::class, $section);
-    $this->assertEquals('foo', $section->getType());
+    $this->assertEquals('section:foo', $section->getType());
     $this->assertInstanceOf(DocumentSection::class, $section->bar);
-    $this->assertEquals('baz', $section->bar->getType());
+    $this->assertEquals('section:baz', $section->bar->getType());
   }
 }

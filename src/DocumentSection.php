@@ -120,7 +120,17 @@ class DocumentSection implements DocumentSectionInterface {
       '__type' => $this->sectionType,
     ];
     foreach ($this->fields as $key => $field) {
-      $value[$key] = $field instanceof DocumentSection ? $field->getValue() : $field;
+      if (is_array($field)) {
+        $value[$key] = array_map(function (DocumentSection $section) {
+          return $section->getValue();
+        }, $field);
+      }
+      else if ($field instanceof DocumentSection) {
+        $value[$key] =  $field->getValue();
+      }
+      else {
+        $value[$key] =  $field;
+      }
     }
     return $value;
   }

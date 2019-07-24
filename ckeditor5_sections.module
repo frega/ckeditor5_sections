@@ -5,6 +5,7 @@
  * Contains hook implementations for the ckeditor5_sections module.
  */
 
+use Drupal\ckeditor5_sections\DocumentSection;
 use Drupal\ckeditor5_sections\Field\TextLongWithSectionsItem;
 use Drupal\ckeditor5_sections\Field\TextWithSummaryAndSectionsItem;
 use Drupal\ckeditor5_sections\Form\SectionsMediaLibraryUploadForm;
@@ -86,4 +87,54 @@ function ckeditor5_sections_ckeditor5_sections_editor_settings_alter(array &$set
     $feeds[] = $plugin->getMentionFeedDefinition();
   }
   $settings['mention']['feeds'] = $feeds;
+}
+
+/**
+ * Implements hook_section_type_definitions_alter().
+ */
+function ckeditor5_sections_section_type_definitions_alter(&$definitions) {
+  foreach (array_keys($definitions) as $key) {
+    $type = &$definitions[$key];
+    if (isset($type['fields']) && array_key_exists('data-media-type', $type['fields'])) {
+      $typeDef = $type['fields']['data-media-type']['default'];
+      if (strpos($typeDef, ':') !== FALSE) {
+        list($entityType, $bundle) = explode(':', $typeDef);
+      }
+      else {
+        $entityType = $typeDef;
+      }
+      $type['fields']['entity'] = [
+        'label' => ucfirst($entityType) . ' Entity',
+        'type' => 'entity:media',
+      ];
+    }
+  }
+}
+
+/**
+ * Implements hook_section_data_alter().
+ */
+function ckeditor5_sections_section_data_alter(&$data) {
+  // TODO: Optimize this by loading multiple entities at once.
+  ckeditor5_sections_attach_entities($data);
+}
+
+function ckeditor5_sections_attach_entities(DocumentSection $section) {
+  $type = $section->get('data-media-type');
+  $uuid = $section->get('data-media-uuid');
+  if ($type && $uuid) {
+    $entityType = explode(':', $type)[0];
+    /** @var \Drupal\Core\Entity\EntityRepositoryInterface $entityRepository */
+    $entityRepository = \Drupal::service('entity.repository');
+    $section->set('entity', $entityRepository->loadEntityByUuid($entityType, $uuid));
+  }
+
+  foreach ($section->getFields() as $field) {
+    if ($field instanceof DocumentSection) {
+      ckeditor5_sections_attach_entities($field);
+    }
+    if (is_array($field)) {
+      array_walk($field, 'ckeditor5_sections_attach_entities');
+    }
+  }
 }

@@ -81,12 +81,16 @@ class DocumentConverterTest extends KernelTestBase {
     return $this->loadTestAssets('assets/data');
   }
 
+  protected function getDocumentConverter() {
+    return $this->container->get('ckeditor5_sections.document_converter');
+  }
+
   /**
    * @covers \Drupal\ckeditor5_sections\DocumentConverter::extractSectionDefinitions
    * @dataProvider extractSectionDefinitionsProvider
    */
   public function testExtractSectionDefinitions($template, $result) {
-    $documentParser = $this->container->get('ckeditor5_sections.document_converter');
+    $documentParser = $this->getDocumentConverter();
     $this->assertEquals($result, $documentParser->extractSectionDefinitions($template));
   }
 
@@ -97,7 +101,7 @@ class DocumentConverterTest extends KernelTestBase {
   public function testExtractSectionData($document, $result) {
     /** @var \Symfony\Component\Serializer\Normalizer\NormalizerInterface $normalizer */
     $normalizer = new DocumentSectionNormalizer();;
-    $documentParser = $this->container->get('ckeditor5_sections.document_converter');
+    $documentParser = $this->getDocumentConverter();
     /** @var \Drupal\ckeditor5_sections\DocumentSection $data */
     $data = $documentParser->extractSectionData($document);
     $this->assertEquals($result, $normalizer->normalize($data, 'json'));
@@ -110,7 +114,7 @@ class DocumentConverterTest extends KernelTestBase {
   public function testNormalization($document, $result) {
     /** @var \Symfony\Component\Serializer\Normalizer\NormalizerInterface $normalizer */
     $normalizer = new DocumentSectionNormalizer();
-    $documentParser = $this->container->get('ckeditor5_sections.document_converter');
+    $documentParser = $this->getDocumentConverter();
     /** @var \Drupal\ckeditor5_sections\DocumentSection $data */
     $data = $documentParser->extractSectionData($document);
     $this->assertEquals($data, $normalizer->denormalize($normalizer->normalize($data)));
@@ -122,7 +126,7 @@ class DocumentConverterTest extends KernelTestBase {
    */
   public function testBuildDocument($document, $data) {
     /** @var \Drupal\ckeditor5_sections\DocumentConverter $documentParser */
-    $documentParser = $this->container->get('ckeditor5_sections.document_converter');
+    $documentParser = $this->getDocumentConverter();
     $normalizer = new DocumentSectionNormalizer();
     $doc = $normalizer->denormalize($data);
     $doc = $documentParser->buildDocument($doc);
