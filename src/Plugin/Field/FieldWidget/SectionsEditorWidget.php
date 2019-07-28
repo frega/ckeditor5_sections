@@ -22,16 +22,39 @@ class SectionsEditorWidget extends StringTextareaWidget {
   /**
    * {@inheritdoc}
    */
-  public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, FormStateInterface $form_state) {
-    $main_widget = parent::formElement($items, $delta, $element, $form, $form_state);
+  public function settingsForm(array $form, FormStateInterface $form_state) {
+    return [];
+  }
 
-    $element = $main_widget['value'];
-    $element['#type'] = 'text_format';
-    $element['#format'] = 'sections_data';
-    $element['#base_type'] = $main_widget['value']['#type'];
+  /**
+   * {@inheritdoc}
+   */
+  public function massageFormValues(array $values, array $form, FormStateInterface $form_state) {
+    return array_map(function (array $item) {
+      return ['html' => $item['html']['value']];
+    }, $values);
+  }
+
+  /**
+   * {@inheritdoc}
+   */
+  public function formElement(FieldItemListInterface $items, $delta, array $element, array &$form, FormStateInterface $form_state) {
+    $element['html'] = $element + [
+      '#type' => 'text_format',
+      '#format' => 'sections_data',
+      '#allowed_formats' => ['sections_data'],
+      '#default_value' => $items[$delta]->html,
+      '#base_type' => 'textarea',
+      '#rows' => $this->getSetting('rows'),
+      '#placeholder' => $this->getSetting('placeholder'),
+      '#attributes' => ['class' => ['js-text-full', 'text-full']],
+    ];
+
     for ($i = 0; $i < $items->count(); $i++) {
-      $element['#attached']['drupalSettings']['ckeditor5_sections']['masterTemplates'][$items->getName() . '[' . $i . '][value]'] = $items->getSetting('template');
+      $key = $items->getName() . '[' . $i . '][html][value]';
+      $element['#attached']['drupalSettings']['ckeditor5_sections']['masterTemplates'][$key] = $items->getSetting('template');
     }
+
     return $element;
   }
 

@@ -99,6 +99,20 @@ class SectionsFieldTest extends EntityKernelTestBase {
     /** @var \Drupal\Core\Entity\EntityRepositoryInterface $entityRepository */
     $entityRepository = $this->container->get('entity.repository');
     $expected['sections'][0]['content']['entity'] = $entityRepository->loadEntityByUuid('entity_test', $this->embeddedEntity->uuid());
+    $expected['sections'][1]['headline'] = 'This is the headline';
+    $this->assertEquals($expected, $data->getValue());
+  }
+
+  /**
+   * Test retrieving section objects.
+   */
+  public function testRetrieveProcessedSectionData() {
+    $data = $this->entity->body->sections_processed;
+    $this->assertInstanceOf(DocumentSection::class, $data);
+    $expected = $this->document;
+    /** @var \Drupal\Core\Entity\EntityRepositoryInterface $entityRepository */
+    $entityRepository = $this->container->get('entity.repository');
+    $expected['sections'][0]['content']['entity'] = $entityRepository->loadEntityByUuid('entity_test', $this->embeddedEntity->uuid());
     $expected['sections'][1]['headline'] = 'This is THE HEADLINE';
     $this->assertEquals($expected, $data->getValue());
   }
@@ -108,6 +122,30 @@ class SectionsFieldTest extends EntityKernelTestBase {
    */
   public function testRetrieveHTMLDocument() {
     $data = $this->entity->body->html;
+    $uuid = $this->embeddedEntity->uuid();
+    $expected = <<<XML
+<ck-section class="page" itemtype="page">
+  <ck-container class="page__container" itemprop="sections">
+    <ck-section class="image" itemtype="image">
+      <ck-media class="image__media" data-media-type="entity_test:entity_test" data-media-uuid="{$uuid}" itemprop="content" itemtype="media"/>
+      <div class="image__caption" itemprop="caption">image caption</div>
+    </ck-section>
+    <ck-section class="text" itemtype="text">
+      <h2 itemprop="headline">this is the headline</h2>
+      <div class="text__content" itemprop="content">this is some content</div>
+    </ck-section>
+  </ck-container>
+</ck-section>
+XML;
+
+    $this->assertXmlStringEqualsXmlString($expected, $data);
+  }
+
+  /**
+   * Test retrieval of the assembled html document.
+   */
+  public function testRetrieveProcessedHTMLDocument() {
+    $data = $this->entity->body->html_processed;
     $uuid = $this->embeddedEntity->uuid();
     $expected = <<<XML
 <ck-section class="page" itemtype="page">

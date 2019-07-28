@@ -6,9 +6,9 @@ use Drupal\ckeditor5_sections\DocumentSection;
 use Drupal\Core\TypedData\TypedData;
 
 /**
- * Computed field proparty implementation to extract typed sections data.
+ * Computed field property implementation to extract typed sections data.
  */
-class SectionsDataField extends TypedData {
+class SectionsProcessedDataField extends TypedData {
 
   /**
    * Cached sections.
@@ -27,6 +27,22 @@ class SectionsDataField extends TypedData {
 
     $item = $this->getParent();
     $text = $item->json;
+
+    $filterFormat = $item->getFieldDefinition()->getSetting('filter_format');
+
+    if ($filterFormat) {
+      $build = [
+        '#type' => 'processed_text',
+        '#text' => $text,
+        '#format' => $filterFormat,
+        '#filter_types_to_skip' => [],
+        '#langcode' => $item->getLangcode(),
+      ];
+      // Capture the cacheability metadata associated with the processed text.
+      // TODO: Handle caching properly?
+      $text = \Drupal::service('renderer')->renderPlain($build);
+    }
+
 
     /* @var \Drupal\ckeditor5_sections\DocumentConverterInterface $parser */
     $this->sections = DocumentSection::fromValue(json_decode($text, TRUE));

@@ -4,6 +4,8 @@ namespace Drupal\ckeditor5_sections\Plugin\Field\FieldType;
 
 use Drupal\ckeditor5_sections\Field\SectionsDataField;
 use Drupal\ckeditor5_sections\Field\SectionsHTMLField;
+use Drupal\ckeditor5_sections\Field\SectionsProcessedDataField;
+use Drupal\ckeditor5_sections\Field\SectionsProcessedHTMLField;
 use Drupal\Core\Field\FieldItemBase;
 use Drupal\Core\Field\FieldStorageDefinitionInterface;
 use Drupal\Core\Form\FormStateInterface;
@@ -15,7 +17,8 @@ use Drupal\filter\Entity\FilterFormat;
  *   id="sections",
  *   label=@Translation("Sections"),
  *   default_formatter="sections_html",
- *   default_widget="sections_json"
+ *   default_widget="sections_json",
+ *   list_class = "\Drupal\ckeditor5_sections\Field\SectionsItemList",
  * )
  */
 class SectionsItem extends FieldItemBase {
@@ -53,6 +56,8 @@ class SectionsItem extends FieldItemBase {
     return $element;
   }
 
+
+
   /**
    * {@inheritdoc}
    */
@@ -67,16 +72,27 @@ class SectionsItem extends FieldItemBase {
       ->setClass(SectionsDataField::class)
       ->setComputed(TRUE);
 
+    $properties['sections_processed'] = DataDefinition::create('section')
+      ->setLabel('The processed sections object tree')
+      ->setClass(SectionsProcessedDataField::class)
+      ->setSetting('processed', TRUE)
+      ->setComputed(TRUE);
+
     $properties['html'] = DataDefinition::create('string')
       ->setLabel('HTML Document')
       ->setComputed(TRUE)
       ->setClass(SectionsHTMLField::class)
       ->setDescription('The assembled HTML document.');
 
-    $properties['value'] = $properties['html'];
+    $properties['html_processed'] = DataDefinition::create('string')
+      ->setLabel('Processed HTML Document')
+      ->setComputed(TRUE)
+      ->setClass(SectionsProcessedHTMLField::class)
+      ->setSetting('processed', TRUE)
+      ->setDescription('The assembled HTML document.');
 
     return $properties;
-  }
+ }
 
   /**
    * {@inheritdoc}
