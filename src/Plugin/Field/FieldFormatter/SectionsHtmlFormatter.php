@@ -2,6 +2,7 @@
 
 namespace Drupal\ckeditor5_sections\Plugin\Field\FieldFormatter;
 
+use Drupal\Core\Field\FieldItemListInterface;
 use Drupal\text\Plugin\Field\FieldFormatter\TextDefaultFormatter;
 
 /**
@@ -16,5 +17,24 @@ use Drupal\text\Plugin\Field\FieldFormatter\TextDefaultFormatter;
  * )
  */
 class SectionsHtmlFormatter extends TextDefaultFormatter {
+  /**
+   * {@inheritdoc}
+   */
+  public function viewElements(FieldItemListInterface $items, $langcode) {
+    $elements = [];
+
+    // The ProcessedText element already handles cache context & tag bubbling.
+    // @see \Drupal\filter\Element\ProcessedText::preRenderText()
+    foreach ($items as $delta => $item) {
+      $elements[$delta] = [
+        '#type' => 'processed_text',
+        '#text' => $item->html,
+        '#format' => 'sections_data',
+        '#langcode' => $item->getLangcode(),
+      ];
+    }
+
+    return $elements;
+  }
 
 }

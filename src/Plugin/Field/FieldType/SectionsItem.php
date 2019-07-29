@@ -24,6 +24,14 @@ use Drupal\filter\Entity\FilterFormat;
 class SectionsItem extends FieldItemBase {
 
   /**
+   * Temporary storage for a merge result string.
+   * TODO: Move document merge to json.
+   *
+   * @type string
+   */
+  public $mergeResult;
+
+  /**
    */
   public function fieldSettingsForm(array $form, FormStateInterface $form_state) {
     $element = [];
@@ -55,8 +63,6 @@ class SectionsItem extends FieldItemBase {
 
     return $element;
   }
-
-
 
   /**
    * {@inheritdoc}

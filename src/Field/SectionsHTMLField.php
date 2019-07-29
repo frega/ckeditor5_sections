@@ -19,11 +19,17 @@ class SectionsHTMLField extends TypedData {
    * {@inheritdoc}
    */
   public function getValue() {
+    $item = $this->getParent();
+    // Check temporary storage for a merge result string.
+    // TODO: Move document merge to json.
+    if ($item->mergeResult) {
+      return $item->mergeResult;
+    }
+
     if ($this->document !== NULL) {
       return $this->document;
     }
 
-    $item = $this->getParent();
     $data = $item->sections;
 
     /** @var \Drupal\ckeditor5_sections\DocumentConverter $documentConverter */
@@ -34,7 +40,8 @@ class SectionsHTMLField extends TypedData {
     }
     $this->document = $documentConverter->buildDocument($data);
 
-    return $this->document->saveXML($this->document->documentElement);
+    $this->document = $this->document->saveXML($this->document->documentElement);
+    return $this->document;
   }
 
   public function setValue($value, $notify = TRUE) {
