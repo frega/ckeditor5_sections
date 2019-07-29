@@ -163,38 +163,10 @@ class TokenMentionProvider extends BaseMentionProvider implements ContainerFacto
    * {@inheritdoc}
    */
   public function process($text, $langcode) {
-    if (strpos($text, 'data-mention=') === FALSE) {
-      return new FilterProcessResult($text);
-    }
-
-    $dom = Html::load($text);
-    $xpath = new \DOMXPath($dom);
-    $result = new FilterProcessResult();
-    /** @var \DOMElement $element */
-    foreach ($xpath->query($this->getXpathQueryForMentionElements()) as $element) {
-      $textNode = $dom->createTextNode($this->getTokenFromMentionValue($element->getAttribute('data-mention')));
-      $element->parentNode->insertBefore($textNode, $element);
-      $element->parentNode->removeChild($element);
-    }
-
-    // Serialize the altered DOM back to string representation.
-    $text = Html::serialize($dom);
-
-    // @note: this is copied from drupal/token_filter.
-    $entity = drupal_static('ckeditor5_sections_token_filter_entity', NULL);
-    $data = [];
-    if (!is_null($entity) && $entity instanceof ContentEntityInterface) {
-      $token_type = $this->tokenEntityMapper->getTokenTypeForEntityType($entity->getEntityTypeId());
-      $data[$token_type] = $entity;
-    }
-
-    // Prepare to gather cache-related metadata.
-    $metadata = new BubbleableMetadata();
-    $result->setProcessedText($this->token->replace($text, $data, ['clear' => TRUE], $metadata));
-
-    // And pass the gathered cache-related metadata to the result.
-    $result->addCacheableDependency($metadata);
-    return $result;
+    $regex = '/<span class=\\\\"mention\\\\" data-mention=\\\\"(@[^"]+)">(?<mention>@[^<]+)<\\\\\/span>/m';
+    return new FilterProcessResult(preg_replace_callback($regex, function ($match) {
+      return $this->getTokenFromMentionValue($match['mention']);
+    }, $text));
   }
 
   /**
