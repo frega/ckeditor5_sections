@@ -149,7 +149,7 @@ class DocumentConverter implements DocumentConverterInterface {
       $prop = $el->getAttribute('itemprop');
       if ($el->hasAttribute('itemtype')) {
         $next = $section->get($prop);
-        if ($next) {
+        if ($next instanceof DocumentSection) {
           $this->processTemplateNode($next, $el);
           return;
         }
