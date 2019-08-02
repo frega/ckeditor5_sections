@@ -118,6 +118,7 @@ Button.styles = css`
     --color-red: #d32323;
     --button-background-color: #ffbb15;
     --button-border-radius: 3em;
+    --button-border-color: transparent;
   }
 
   .button {
@@ -125,6 +126,7 @@ Button.styles = css`
     align-items: center;
     font-weight: bold;
     background: var(--button-background-color);
+    border: 1px solid var(--button-border-color);
     border-radius: var(--button-border-radius);
     padding: 0 1em;
   }
@@ -143,6 +145,7 @@ Button.styles = css`
     transition: transform 0.5s ease;
     outline: none;
     margin-left: 0.5em;
+    position: relative;
   }
 
   .button svg {
