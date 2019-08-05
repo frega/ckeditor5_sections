@@ -66,7 +66,6 @@ img {
 .ck-media__preview {
   width: 100%;
   height: 100%;
-  pointer-events: none;
 }
 
 .ck-media__loader {
