@@ -11,20 +11,9 @@ use Drupal\Core\TypedData\TypedData;
 class SectionsProcessedDataField extends TypedData {
 
   /**
-   * Cached sections.
-   *
-   * @var array|null
-   */
-  protected $sections = NULL;
-
-  /**
    * {@inheritdoc}
    */
   public function getValue() {
-    if ($this->sections !== NULL) {
-      return $this->sections;
-    }
-
     $item = $this->getParent();
     $text = $item->json;
 
@@ -45,13 +34,13 @@ class SectionsProcessedDataField extends TypedData {
 
 
     /* @var \Drupal\ckeditor5_sections\DocumentConverterInterface $parser */
-    $this->sections = DocumentSection::fromValue(json_decode($text, TRUE));
+    $sections = DocumentSection::fromValue(json_decode($text, TRUE));
 
     // Invoke alter hooks before returning data.
-    if ($this->sections) {
-      \Drupal::moduleHandler()->alter('section_data', $this->sections, $item);
+    if ($sections) {
+      \Drupal::moduleHandler()->alter('section_data', $sections, $item);
     }
-    return $this->sections;
+    return $sections;
   }
 
   public function setValue($value, $notify = TRUE) {

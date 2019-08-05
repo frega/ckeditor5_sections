@@ -9,20 +9,9 @@ use Drupal\Core\TypedData\TypedData;
  */
 class SectionsProcessedHTMLField extends TypedData {
   /**
-   * Cached sections.
-   *
-   * @var array|null
-   */
-  protected $document = NULL;
-
-  /**
    * {@inheritdoc}
    */
   public function getValue() {
-    if ($this->document !== NULL) {
-      return $this->document;
-    }
-
     $item = $this->getParent();
     $data = $item->sections_processed;
 
@@ -32,10 +21,10 @@ class SectionsProcessedHTMLField extends TypedData {
     if (!$data) {
       return '';
     }
-    $this->document = $documentConverter->buildDocument($data);
+    $document = $documentConverter->buildDocument($data);
 
-    $this->document = $this->document->saveXML($this->document->documentElement, LIBXML_NOEMPTYTAG);
-    return $this->document;
+    $document = $this->document->saveXML($document->documentElement, LIBXML_NOEMPTYTAG);
+    return $document;
   }
 
   public function setValue($value, $notify = TRUE) {
