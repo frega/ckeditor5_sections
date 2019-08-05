@@ -129,6 +129,7 @@ class DocumentConverter implements DocumentConverterInterface {
     $fields = $section->getFields();
     $current = $section->getType() === 'section:' . $el->getAttribute('itemtype');
     $isContainer = $el->hasAttribute('ck-contains');
+    $isInput = $el->hasAttribute('ck-input');
     $removableAttributes = [];
     foreach ($el->attributes as $attributeName => $attribute) {
       if (strpos($attributeName, 'ck-') === 0) {
@@ -161,7 +162,8 @@ class DocumentConverter implements DocumentConverterInterface {
           $el->appendChild($childSection);
         }
       }
-      elseif ($value = $section->get($prop)) {
+      elseif ($section->get($prop) || $isInput) {
+        $value = $section->get($prop);
         $prop_value = Html::normalize($value);
         $fragment = new \DOMDocument();
         $fragment->loadHTML('<?xml encoding="utf-8" ?><div>' . $prop_value . '</div>');
