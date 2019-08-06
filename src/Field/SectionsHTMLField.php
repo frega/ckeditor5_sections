@@ -40,6 +40,11 @@ class SectionsHTMLField extends TypedData {
       $documentConverter = \Drupal::service('ckeditor5_sections.document_converter');
       $doc = $documentConverter->extractSectionData($value);
       $this->parent->setValue(json_encode($doc->getValue()));
+      // Check temporary storage for a merge result string.
+      // TODO: Move document merge to json.
+      if ($this->parent->mergeResult) {
+        $this->parent->mergeResult = $value;
+      }
     }
   }
 

@@ -224,7 +224,7 @@
     }
 
     return window.ckeditor5_sections_builds[editorSettings.editorBuild].create(editor, Object.assign({
-      masterTemplate: drupalSettings.ckeditor5_sections.masterTemplates[element.name],
+      masterTemplate: element.getAttribute('data-sections-template'),
       templates: editorSettings.templates,
       templateAttributes: editorSettings.templateAttributes,
       templateSession: editorSettings.templateSession,

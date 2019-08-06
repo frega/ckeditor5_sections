@@ -47,13 +47,11 @@ class SectionsEditorWidget extends StringTextareaWidget {
       '#base_type' => 'textarea',
       '#rows' => $this->getSetting('rows'),
       '#placeholder' => $this->getSetting('placeholder'),
-      '#attributes' => ['class' => ['js-text-full', 'text-full']],
+      '#attributes' => [
+        'class' => ['js-text-full', 'text-full'],
+        'data-sections-template' => $items->getSetting('template'),
+      ],
     ];
-
-    for ($i = 0; $i < $items->count(); $i++) {
-      $key = $items->getName() . '[' . $i . '][html][value]';
-      $element['#attached']['drupalSettings']['ckeditor5_sections']['masterTemplates'][$key] = $items->getSetting('template');
-    }
 
     return $element;
   }
