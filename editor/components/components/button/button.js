@@ -115,6 +115,9 @@ Button.styles = css`
     display: inline-block;
     --icon-size: 2em;
     --icon-color: black;
+    --icon-position: static;
+    --icon-left: auto;
+    --icon-top: auto;
     --color-red: #d32323;
     --button-background-color: #ffbb15;
     --button-border-radius: 3em;
@@ -137,6 +140,9 @@ Button.styles = css`
 
   .button button {
     width: var(--icon-size);
+    position: var(--icon-position);
+    left: var(--icon-left);
+    top: var(--icon-top);
     border: none;
     padding: 0;
     background: none;
