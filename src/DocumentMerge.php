@@ -51,7 +51,7 @@ class DocumentMerge implements DocumentMergeInterface {
     $this->traverseLeft($this->leftTree->getRoot());
     $this->removeDuplicatesFromTree($this->resultTree->getRoot());
 
-    $result = new \DOMDocument();
+    $result = new \DOMDocument('', 'UTF-8');
     $result->formatOutput = TRUE;
     $element = $result->createElement('body');
     $result->appendChild($element);
@@ -519,9 +519,9 @@ class DocumentMerge implements DocumentMergeInterface {
    */
   protected function getTree($string) {
     libxml_use_internal_errors(TRUE);
-    $document = new \DOMDocument();
+    $document = new \DOMDocument('', 'UTF-8');
     $document->preserveWhiteSpace = FALSE;
-    $document->loadHTML($string);
+    $document->loadHTML(mb_convert_encoding($string, 'HTML-ENTITIES', 'UTF-8'));
     return Tree::buildTree($document);
   }
 

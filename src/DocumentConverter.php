@@ -103,7 +103,7 @@ class DocumentConverter implements DocumentConverterInterface {
    * @return \DOMDocument
    */
   public function buildDocument(DocumentSection $section) {
-    $xml = new \DOMDocument();
+    $xml = new \DOMDocument('', 'UTF-8');
     $xml->appendChild($this->buildDocumentSection($section, $xml));
     return $xml;
   }
@@ -165,7 +165,7 @@ class DocumentConverter implements DocumentConverterInterface {
       elseif ($section->get($prop) || $isInput) {
         $value = $section->get($prop);
         $prop_value = Html::normalize($value);
-        $fragment = new \DOMDocument();
+        $fragment = new \DOMDocument('', 'UTF-8');
         $fragment->loadHTML('<?xml encoding="utf-8" ?><div>' . $prop_value . '</div>');
         foreach ($el->childNodes as $child) {
           $el->removeChild($child);
@@ -204,7 +204,7 @@ class DocumentConverter implements DocumentConverterInterface {
     // The type of the fields depends on the 'itemtype' property of the element.
     // If the 'itemtype' is empty, then the type will be set to string. If there
     // is an 'itemtype' then this will become the type of the field.
-    $dom = new \DOMDocument();
+    $dom = new \DOMDocument('', 'UTF-8');
     // Load the document and convert the encoding to HTML-ENTITIES, see
     // https://davidwalsh.name/domdocument-utf8-problem
     $dom->loadHTML(mb_convert_encoding($document, 'HTML-ENTITIES', 'UTF-8'), LIBXML_NOERROR);
@@ -231,7 +231,7 @@ class DocumentConverter implements DocumentConverterInterface {
    * {@inheritdoc}
    */
   public function extractSectionData($document) {
-    $dom = new \DOMDocument();
+    $dom = new \DOMDocument('', 'UTF-8');
     $dom->loadHTML(mb_convert_encoding($document, 'HTML-ENTITIES', 'UTF-8'), LIBXML_NOERROR);
     // $list_definition = \Drupal::typedDataManager()->createListDataDefinition('section');
     // $result = \Drupal::typedDataManager()->create($list_definition);
