@@ -115,7 +115,7 @@ Button.styles = css`
     display: inline-block;
     --icon-size: 2em;
     --icon-color: black;
-    --icon-position: static;
+    --icon-position: relative;
     --icon-left: auto;
     --icon-top: auto;
     --color-red: #d32323;
@@ -140,9 +140,6 @@ Button.styles = css`
 
   .button button {
     width: var(--icon-size);
-    position: var(--icon-position);
-    left: var(--icon-left);
-    top: var(--icon-top);
     border: none;
     padding: 0;
     background: none;
@@ -151,14 +148,16 @@ Button.styles = css`
     transition: transform 0.5s ease;
     outline: none;
     margin-left: 0.5em;
-    position: relative;
+    position: var(--icon-position);
+    left: var(--icon-left);
+    top: var(--icon-top);
   }
 
   .button svg {
+    width: var(--icon-size);
     padding: 0;
     display: block;
     fill: var(--icon-color);
-    width: var(--icon-size);
   }
 
   .button.not-linked svg {
