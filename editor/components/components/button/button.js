@@ -115,9 +115,13 @@ Button.styles = css`
     display: inline-block;
     --icon-size: 2em;
     --icon-color: black;
+    --icon-position: relative;
+    --icon-left: auto;
+    --icon-top: auto;
     --color-red: #d32323;
     --button-background-color: #ffbb15;
     --button-border-radius: 3em;
+    --button-border-color: transparent;
   }
 
   .button {
@@ -125,6 +129,7 @@ Button.styles = css`
     align-items: center;
     font-weight: bold;
     background: var(--button-background-color);
+    border: 1px solid var(--button-border-color);
     border-radius: var(--button-border-radius);
     padding: 0 1em;
   }
@@ -143,13 +148,16 @@ Button.styles = css`
     transition: transform 0.5s ease;
     outline: none;
     margin-left: 0.5em;
+    position: var(--icon-position);
+    left: var(--icon-left);
+    top: var(--icon-top);
   }
 
   .button svg {
+    width: var(--icon-size);
     padding: 0;
     display: block;
     fill: var(--icon-color);
-    width: var(--icon-size);
   }
 
   .button.not-linked svg {
