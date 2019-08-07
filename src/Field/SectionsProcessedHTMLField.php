@@ -23,8 +23,7 @@ class SectionsProcessedHTMLField extends TypedData {
     }
     $document = $documentConverter->buildDocument($data);
 
-    $document = $this->document->saveXML($document->documentElement, LIBXML_NOEMPTYTAG);
-    return $document;
+    return $document->saveXML($document->documentElement, LIBXML_NOEMPTYTAG);
   }
 
   public function setValue($value, $notify = TRUE) {
