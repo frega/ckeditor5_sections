@@ -954,6 +954,15 @@ XML;
     $this->assertMergeResult($source, $left, $right, $result);
   }
 
+  public function testOneEmptyLinkExample() {
+    $folder = dirname(__FILE__);
+    $source = file_get_contents($folder . '/files/one-empty-link/source.html');
+    $left = file_get_contents($folder . '/files/one-empty-link/left.html');
+    $right = file_get_contents($folder . '/files/one-empty-link/right.html');
+    $result = file_get_contents($folder . '/files/one-empty-link/result.html');
+    $this->assertMergeResult($source, $left, $right, $result);
+  }
+
   public function testRichTextExample() {
     $folder = dirname(__FILE__);
     $source = file_get_contents($folder . '/files/rich_text/source.xml');
