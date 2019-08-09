@@ -191,7 +191,7 @@ class DocumentMerge implements DocumentMergeInterface {
             // content.
             $sourceNode = $this->sourceTree->search($currentNode->getId());
             if (!empty($sourceNode)) {
-              if ($currentNode->matchAttributes($sourceNode)) {
+              if ($currentNode->matchAttributes($sourceNode) && $leftNode->getDomNode()->tagName !== 'ck-button') {
                 $clonedTree = Tree::cloneSubtree($leftNode);
                 $clonedTree->getRoot()->flag('added', 'left');
                 $this->resultTree->addNode($clonedTree->getRoot(), $resultParent);

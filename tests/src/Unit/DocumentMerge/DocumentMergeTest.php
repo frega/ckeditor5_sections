@@ -954,12 +954,21 @@ XML;
     $this->assertMergeResult($source, $left, $right, $result);
   }
 
-  public function testOneEmptyLinkExample() {
+  public function testLeftLinkEmpty() {
     $folder = dirname(__FILE__);
-    $source = file_get_contents($folder . '/files/one-empty-link/source.html');
-    $left = file_get_contents($folder . '/files/one-empty-link/left.html');
-    $right = file_get_contents($folder . '/files/one-empty-link/right.html');
-    $result = file_get_contents($folder . '/files/one-empty-link/result.html');
+    $source = file_get_contents($folder . '/files/left-link-empty/source.html');
+    $left = file_get_contents($folder . '/files/left-link-empty/left.html');
+    $right = file_get_contents($folder . '/files/left-link-empty/right.html');
+    $result = file_get_contents($folder . '/files/left-link-empty/result.html');
+    $this->assertMergeResult($source, $left, $right, $result);
+  }
+
+  public function testRightLinkEmpty() {
+    $folder = dirname(__FILE__);
+    $source = file_get_contents($folder . '/files/right-link-empty/source.html');
+    $left = file_get_contents($folder . '/files/right-link-empty/left.html');
+    $right = file_get_contents($folder . '/files/right-link-empty/right.html');
+    $result = file_get_contents($folder . '/files/right-link-empty/result.html');
     $this->assertMergeResult($source, $left, $right, $result);
   }
 
