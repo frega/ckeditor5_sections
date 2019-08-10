@@ -142,10 +142,9 @@ ButtonConflict.styles = css`
     position: relative;
   }
   .conflict-options {
-    position: fixed;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
+    position: absolute;
+    right: 0;
+    bottom: 100%;
     z-index: 9999;
     max-width: 400px;
     background: white;
@@ -155,7 +154,7 @@ ButtonConflict.styles = css`
     display: grid;
   }
   .option_info {
-    paddin: 10px;
+    padding: 10px;
   }
   .icon.red svg path {
     fill: red;
