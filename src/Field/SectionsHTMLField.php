@@ -30,7 +30,7 @@ class SectionsHTMLField extends TypedData {
     }
     $document = $documentConverter->buildDocument($data);
 
-    $document = $document->saveXML($document->documentElement, LIBXML_NOEMPTYTAG);
+    $document = $document->saveHTML($document->documentElement);
     return $document;
   }
 
