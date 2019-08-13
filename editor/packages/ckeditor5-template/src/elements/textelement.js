@@ -183,5 +183,72 @@ export default class TextElement extends Plugin {
 				evt.stop();
 			}
 		}, { priority: 'high' } );
+
+		const view = this.editor.editing.view;
+		const viewDocument = view.document;
+
+		// Handle delete behaviour.
+		this.listenTo( viewDocument, 'delete', ( evt, data ) => {
+			this._handleDelete( evt, data );
+		}, { priority: 'high' } );
+	}
+
+	/**
+	 * Handles delete on the text elements (paragraphs) that for some do not act
+	 * like the "original" elements outside templates.
+	 */
+	_handleDelete( evt, data ) {
+		// Do nothing when the read only mode is enabled.
+		if ( this.editor.isReadOnly ) {
+			return;
+		}
+
+		const isForward = data.direction == 'forward';
+		const modelDocument = this.editor.model.document;
+		const modelSelection = modelDocument.selection;
+
+		// Do nothing on non-collapsed selection.
+		if ( !modelSelection.isCollapsed ) {
+			return;
+		}
+
+		const nodeToRemove = modelSelection.anchor.parent;
+		// If we are backspacing and the element is "empty" ...
+		if (!isForward && modelSelection.focus.isAtEnd && modelSelection.focus.isAtStart)  {
+			// Then let's remove the element.
+			this.editor.model.change( writer => {
+				writer.remove( nodeToRemove );
+			} );
+			// @note: the normal delete event handling leads to the cursor/selection
+			// moving to the previous sibling.
+		}
+		// If we are forward deleting (delete key), and we are at the _end_ of the
+		// element then ...
+		else if (isForward && modelSelection.focus.isAtEnd) {
+			// check if the element is "empty" (i.e. at end and start simultaneously)
+			if (modelSelection.focus.isAtStart) {
+				// then we should current element.
+				this.editor.model.change(writer => {
+					if (nodeToRemove.nextSibling) {
+						writer.setSelection(writer.createPositionAt(nodeToRemove.nextSibling, 0));
+					}
+					writer.remove(nodeToRemove);
+				});
+			}
+			// If we have a next sibling, let's at least move to the next line?
+			else if (nodeToRemove.nextSibling) {
+				// then we should current element.
+				this.editor.model.change(writer => {
+					writer.setSelection(writer.createPositionAt(nodeToRemove.nextSibling, 0));
+				});
+			}
+			// Switch the forwardDelete (aka 'delete' key) to be a 'delete' (aka 'backspace' key).
+			// if we are at the end of the document.
+			else {
+				this.editor.execute('delete');
+			}
+			data.preventDefault();
+			evt.stop();
+		}
 	}
 }
