@@ -23,6 +23,8 @@ import TemplateEditing from '../packages/ckeditor5-template/src/templateediting'
 import RemoteControl from '../packages/ckeditor5-template/src/remotecontrol';
 import MergeEditing from "../packages/ckeditor5-template/src/mergeediting";
 
+import CKEditorInspector from '@ckeditor/ckeditor5-inspector';
+
 export default class SectionsEditor extends BalloonEditorBase { }
 
 // Plugins to include in the build.

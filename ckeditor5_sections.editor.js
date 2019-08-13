@@ -2,12 +2,12 @@
  * @file
  * The editor initialization.
  */
+var editors = {};
 
 (function ($, Drupal) {
 
   'use strict';
 
-  var editors = {};
 
   Drupal.editors.ckeditor5_sections = {
     attach: function attach(element, format) {
@@ -17,6 +17,8 @@
           $(element).val(editor.getData());
           $(element).attr('data-editor-value-is-changed', 'true');
         });
+        // Quick hack to attach inspector
+        setTimeout(function() { CKEditorInspector.attach( editor ); });
       }).catch(error => {
         console.error(error.stack);
       });

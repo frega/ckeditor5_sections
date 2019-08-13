@@ -164,5 +164,46 @@ export default class TextElement extends Plugin {
 				return true;
 			}
 		} );
+
+		const view = this.editor.editing.view;
+		const viewDocument = view.document;
+
+		// Handle custom delete behaviour.
+		this.listenTo( viewDocument, 'delete', ( evt, data ) => {
+			if (this._handleDelete( data.direction == 'forward' )) {
+				data.preventDefault();
+				evt.stop();
+			}
+		}, { priority: 'high' } );
+	}
+
+	// partly copied from widget.js
+	_handleDelete( isForward ) {
+		// Do nothing when the read only mode is enabled.
+		if ( this.editor.isReadOnly ) {
+			return;
+		}
+
+		const modelDocument = this.editor.model.document;
+		const modelSelection = modelDocument.selection;
+
+		// Do nothing on non-collapsed selection.
+		if ( !modelSelection.isCollapsed ) {
+			return;
+		}
+
+		// This checks if the selection is on an empty element
+		if (modelSelection.focus.isAtEnd && modelSelection.focus.isAtStart) {
+			this.editor.model.change( writer => {
+				const nodeToRemove = modelSelection.anchor.parent;
+				const elementForRange = isForward ? nodeToRemove.nextSibling : nodeToRemove.previousSibling;
+				const position = isForward ? 'before' : 'after';
+				writer.remove( nodeToRemove );
+				// @todo: this is *not* correct yet. but something like this needs to happen
+				if (elementForRange) {
+					writer.setSelection( elementForRange, position );
+				}
+			} );
+		}
 	}
 }

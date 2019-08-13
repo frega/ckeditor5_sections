@@ -9,6 +9,11 @@ editor_build:
   dependencies:
     - ckeditor5_sections/editor_components
 
+# quick hack to include the CKEditor5v12+ inspector.
+editor_inspector:
+  js:
+    editor/node_modules/@ckeditor/ckeditor5-inspector/build/inspector.js: {}
+
 editor:
   js:
     ckeditor5_sections.editor.js: { preprocess: false }
@@ -19,6 +24,8 @@ editor:
     - core/drupal.dialog.ajax
     - core/jquery.once
     - core/drupal
+    # quick hack to include the CKEditor5v12+ inspector.
+    - ckeditor5_sections/editor_inspector
     - ckeditor5_sections/editor_build
     - ckeditor5_sections/sections
 
