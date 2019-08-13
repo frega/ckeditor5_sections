@@ -164,5 +164,24 @@ export default class TextElement extends Plugin {
 				return true;
 			}
 		} );
+
+		// Catch soft linebreaks in text elements with "plain" ck-input attribute.
+		this.listenTo( this.editor.editing.view.document, 'enter', ( evt, data ) => {
+			// Do nothing if is *not* soft, hard break is handled elsewhere.
+			if (!data.isSoft) {
+				return ;
+			}
+
+			// Determine whether the current element ha "plain" input configuration.
+			const modelSelection = this.editor.model.document.selection;
+			const element = modelSelection.getSelectedElement() || modelSelection.anchor.parent;
+			const info = this.editor.templates.getElementInfo( element.name );
+
+			// Abort if matched to a template with plain input configuration.
+			if (info && info.configuration && info.configuration.input === 'plain') {
+				data.preventDefault();
+				evt.stop();
+			}
+		}, { priority: 'high' } );
 	}
 }
