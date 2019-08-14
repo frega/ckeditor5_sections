@@ -235,6 +235,21 @@ export default class TemplateEditing extends Plugin {
 			},
 			converterPriority: 'low'
 		} ) );
+
+		// Capture clipboardInput (paste) event and abort if within a template or
+		// element that cannot handle this.
+		this.listenTo( this.editor.editing.view.document, 'clipboardInput', ( evt, data ) => {
+			const modelSelection = this.editor.model.document.selection;
+			const modelElement = modelSelection.getSelectedElement() || modelSelection.anchor.parent;
+			const modelInfo = this.editor.templates.getElementInfo( modelElement.name );
+
+			// Abort if matched to a template that has either no configuration or no
+			// input configuration.
+			// @todo: allow custom elements/templates to handle clipboard paste.
+			if (modelInfo && (!modelInfo.configuration || !modelInfo.configuration.input)) {
+				evt.stop();
+			}
+		}, { priority: 'high' } );
 	}
 
 	_postfixElement( item, writer ) {
