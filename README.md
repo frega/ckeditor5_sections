@@ -16,7 +16,7 @@ structured information is exposed to typed data.
 3. Run `yarn build`.
 4. Commit the build result.
 
-### CKEditor5 inspcector
+### CKEditor5 inspector
 
 From V12 onwards CKEditor comes with a nifty [inspector](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/development-tools.html#ckeditor-5-inspector).
 To enable it follow these steps:
