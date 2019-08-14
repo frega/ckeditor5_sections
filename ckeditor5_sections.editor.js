@@ -17,6 +17,10 @@
           $(element).val(editor.getData());
           $(element).attr('data-editor-value-is-changed', 'true');
         });
+        // Attach CKEditorInspector if available.
+        if (typeof CKEditorInspector !== 'undefined') {
+          CKEditorInspector.attach( editor );
+        }
       }).catch(error => {
         console.error(error.stack);
       });
