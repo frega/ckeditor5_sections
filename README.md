@@ -21,7 +21,7 @@ structured information is exposed to typed data.
 From V12 onwards CKEditor comes with a nifty [inspector](https://ckeditor.com/docs/ckeditor5/latest/framework/guides/development-tools.html#ckeditor-5-inspector).
 To enable it follow these steps:
 
-1. Add a line to the `development.services.yml`: `ckeditor5_sections.enable_inspector: true`
+1. Add a line to the `parameters` section of `development.services.yml`: `ckeditor5_sections.enable_inspector: true`
 2. Make sure to run `yarn install` in the `editor/`-subfolder to install it.
 3. Rebuild caches `drush cr`.
 
