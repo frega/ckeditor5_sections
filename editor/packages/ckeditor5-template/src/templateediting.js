@@ -247,6 +247,7 @@ export default class TemplateEditing extends Plugin {
 			// input configuration.
 			// @todo: allow custom elements/templates to handle clipboard paste.
 			if (modelInfo && (!modelInfo.configuration || !modelInfo.configuration.input)) {
+				console.warn('Pasting in selection aborted - please review selected model: ', modelInfo);
 				evt.stop();
 			}
 		}, { priority: 'high' } );
