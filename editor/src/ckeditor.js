@@ -22,6 +22,7 @@ import Template from '../packages/ckeditor5-template/src/template';
 import TemplateEditing from '../packages/ckeditor5-template/src/templateediting';
 import RemoteControl from '../packages/ckeditor5-template/src/remotecontrol';
 import MergeEditing from "../packages/ckeditor5-template/src/mergeediting";
+import Linkit from "../packages/ckeditor5-linkit/src/linkit";
 
 export default class SectionsEditor extends BalloonEditorBase { }
 
@@ -47,7 +48,8 @@ SectionsEditor.builtinPlugins = [
 	Template,
 	TemplateEditing,
 	MergeEditing,
-  Link,
+	Link,
+	Linkit,
 ];
 
 // Editor configuration.
