@@ -184,11 +184,8 @@ export default class TextElement extends Plugin {
 			}
 		}, { priority: 'high' } );
 
-		const view = this.editor.editing.view;
-		const viewDocument = view.document;
-
 		// Handle delete behaviour.
-		this.listenTo( viewDocument, 'delete', ( evt, data ) => {
+		this.listenTo( this.editor.editing.view.document, 'delete', ( evt, data ) => {
 			this._handleDelete( evt, data );
 		}, { priority: 'high' } );
 	}
@@ -206,6 +203,10 @@ export default class TextElement extends Plugin {
 		const isForward = data.direction == 'forward';
 		const modelDocument = this.editor.model.document;
 		const modelSelection = modelDocument.selection;
+
+		const element = modelSelection.getSelectedElement() || modelSelection.anchor.parent;
+		const info = this.editor.templates.getElementInfo( element.name );
+		const isPlainText = info && info.configuration && info.configuration.input === 'plain';
 
 		// Do nothing on non-collapsed selection.
 		if ( !modelSelection.isCollapsed ) {
@@ -235,8 +236,10 @@ export default class TextElement extends Plugin {
 					writer.remove(nodeToRemove);
 				});
 			}
-			// If we have a next sibling, let's at least move to the next line?
-			else if (nodeToRemove.nextSibling) {
+			// If we have a next sibling, let's at least move to the next line, but
+			// *only* if we are a "multi-line" element. so as not to jump from one
+			// template element to the next.
+			else if (nodeToRemove.nextSibling && !isPlainText) {
 				// then we should current element.
 				this.editor.model.change(writer => {
 					writer.setSelection(writer.createPositionAt(nodeToRemove.nextSibling, 0));
