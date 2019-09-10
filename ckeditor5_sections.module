@@ -64,21 +64,6 @@ function ckeditor5_sections_module_implements_alter(&$implementations, $hook) {
 }
 
 /**
- * Implements hook_field_info_alter().
- */
-function ckeditor5_sections_field_info_alter(&$info) {
-  $field_types = [
-    'text_with_summary' => TextWithSummaryAndSectionsItem::class,
-    'text_long' => TextLongWithSectionsItem::class,
-  ];
-  foreach ($field_types as $field_type => $class_name) {
-    if (!empty($info[$field_type])) {
-      $info[$field_type]['class'] = $class_name;
-    }
-  }
-}
-
-/**
  * Implements hook_media_source_info_alter().
  */
 function ckeditor5_sections_media_source_info_alter(array &$sources) {
