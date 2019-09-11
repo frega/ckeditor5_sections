@@ -62,6 +62,26 @@ class SectionsCollector implements SectionsCollectorInterface, EventSubscriberIn
   }
 
   /**
+   * Retrieve a list of all stylesheets.
+   * 
+   * @param string $directory
+   *   The directory to scan. Will default to the `sections` module.
+   * @return string[]
+   *   The list of css file paths.
+   */
+  public function getStyleSheets($directory = NULL) {
+    if (!$directory) {
+      $directory = drupal_get_path('module', 'ckeditor5_sections') . '/sections';
+    }
+    $files = file_scan_directory($directory, '/.*.css/');
+    $styleSheets = [];
+    foreach ($files as $file => $file_info) {
+      $styleSheets[] = $file_info->uri;
+    }
+    return $styleSheets;
+  }
+
+  /**
    * Returns all sections defined in templates/sections.
    *
    * @param null $directory
