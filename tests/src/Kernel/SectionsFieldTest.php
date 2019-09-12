@@ -36,6 +36,7 @@ class SectionsFieldTest extends EntityKernelTestBase {
 
    public static $modules = [
      'editor',
+     'linkit',
      'ckeditor5_sections',
      'ckeditor5_sections_test',
    ];

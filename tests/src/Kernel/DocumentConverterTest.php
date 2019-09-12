@@ -27,6 +27,7 @@ class DocumentConverterTest extends KernelTestBase {
     'media',
     'filter',
     'user',
+    'linkit',
     'serialization',
   ];
 
