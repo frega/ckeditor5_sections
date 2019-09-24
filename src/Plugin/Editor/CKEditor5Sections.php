@@ -236,7 +236,6 @@ class CKEditor5Sections extends EditorBase implements ContainerFactoryPluginInte
    * {@inheritDoc}
    */
   public function settingsFormValidate(array $form, FormStateInterface $form_state) {
-    parent::settingsFormValidate($form, $form_state);
     $advanced = $form_state->getValue(['editor', 'settings', 'advanced']);
     if (is_null(json_decode($advanced))) {
       $form_state->setErrorByName('editor][settings][advanced', $this->t('Advanced configuration is not valid JSON.'));
