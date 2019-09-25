@@ -145,7 +145,7 @@ export default class Section extends EditorElement {
       containerItems
     }
   }) {
-    this.inContainer = inContainer;
+    this.inContainer = inContainer && this.inEditor;
     this.containerSections = containerSections;
     this.containerIndex = containerIndex;
     this.containerMax = containerMax;

@@ -26,6 +26,7 @@ class DocumentSectionTypedDataCustomValidationTest extends KernelTestBase {
     'media',
     'node',
     'user',
+    'linkit',
     'image'
   ];
 
