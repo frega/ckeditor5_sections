@@ -163,10 +163,36 @@ class TokenMentionProvider extends BaseMentionProvider implements ContainerFacto
    * {@inheritdoc}
    */
   public function process($text, $langcode) {
-    $regex = '/<span class=\\\\"mention\\\\" data-mention=\\\\"(@[^"]+)">(?<mention>@[^<]+)<\\\\\/span>/m';
-    return new FilterProcessResult(preg_replace_callback($regex, function ($match) {
+    // Replace the rendered "mention" with the corresponding (Drupal) token.
+    $regex = '/<span class="mention" data-mention="(@[^"]+)">(?<mention>@[^<]+)<\/span>/m';
+    $text = preg_replace_callback($regex, function ($match) {
       return $this->getTokenFromMentionValue($match['mention']);
-    }, $text));
+    }, $text, -1, $replace_count);
+
+    // Bail out if no replacement was found.
+    if (!$replace_count) {
+      return new FilterProcessResult($text);
+    }
+
+    $result = new FilterProcessResult();
+    // @note: this is analogous to how drupal/token_filter "forces" context into
+    // the processing.
+    $entity = drupal_static('ckeditor5_sections_token_filter_entity', NULL);
+    $data = [];
+    if (!is_null($entity) && $entity instanceof ContentEntityInterface) {
+      $token_type = $this->tokenEntityMapper->getTokenTypeForEntityType($entity->getEntityTypeId());
+      $data[$token_type] = $entity;
+    }
+
+    // Prepare to gather cache-related metadata.
+    $metadata = new BubbleableMetadata();
+    $result->setProcessedText($this->token->replace($text, $data, [
+      'clear' => TRUE,
+      'langcode' => $langcode,
+    ], $metadata));
+    // And pass the gathered cache-related metadata to the result.
+    $result->addCacheableDependency($metadata);
+    return $result;
   }
 
   /**
