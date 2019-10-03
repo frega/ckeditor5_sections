@@ -144,7 +144,7 @@
         }
 
         Drupal.ajax({
-          url: Drupal.url(path + '&field_id=' + $(element).attr('id') + typeFilter + '&return_type=uuid&media_library_selected_type=' + selectedType + '&media_library_remaining=1'),
+          url: Drupal.url(path + '&field_id=' + $(element).attr('id') + typeFilter + '&media_library_selected_type=' + selectedType + '&media_library_remaining=1'),
           dialogType: 'modal',
           dialog: {
             dialogClass: 'media-library-widget-modal',
@@ -168,7 +168,7 @@
         }
 
         Drupal.ajax({
-          url: Drupal.url('admin/content/content-widget?field_id=' + $(element).attr('id') + '&content_library_widget_id=' + $(element).attr('id') + typeFilter + '&return_type=uuid&media_library_selected_type=' + selectedType + '&media_library_remaining=1' ),
+          url: Drupal.url('admin/content/content-widget?field_id=' + $(element).attr('id') + '&content_library_widget_id=' + $(element).attr('id') + typeFilter + '&media_library_selected_type=' + selectedType + '&media_library_remaining=1' ),
           dialogType: 'modal',
           dialog: {
             dialogClass: 'media-library-widget-modal',
