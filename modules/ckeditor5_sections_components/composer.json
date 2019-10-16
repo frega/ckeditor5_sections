@@ -1,0 +1,22 @@
+{
+    "name": "drupal/ckeditor5_sections_components",
+    "type": "drupal-module",
+    "description": "Integrates ckeditor5_sections with  components",
+    "require": {
+        "php": ">=5.6.0",
+        "drupal/components": "^1.1"
+    },
+    "repositories": [
+        {
+            "type": "composer",
+            "url": "https://packages.drupal.org/8"
+        }
+    ],
+    "extra": {
+        "drush": {
+            "services": {
+                "drush.services.yml": "^9"
+            }
+        }
+    }
+}

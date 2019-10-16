@@ -1,0 +1,23 @@
+<details>
+  <summary>{{ section }}</summary>
+  {% if properties is not empty %}
+    <h3>Properties</h3>
+    <ul>
+    {% for prop_name, prop_value in properties %}
+      <li>
+        {{ prop_name }}:
+        {% if  prop_value is not iterable %}{{ prop_value }}{% endif %}
+      </li>
+    {% endfor %}
+    </ul>
+  {% endif %}
+  {% if sections is not empty %}
+    {% for section_name, section in sections %}
+      <details>
+        <summary>{{ section_name }}</summary>
+        {{ build_section(section) }}
+      </details>
+    {% endfor %}
+  {% endif %}
+  <pre>{{ dump(document_section.getValue)  }}</pre>
+</details>

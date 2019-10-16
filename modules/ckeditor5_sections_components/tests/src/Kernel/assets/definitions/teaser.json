@@ -1,0 +1,99 @@
+{
+  "teaser": {
+    "type": "teaser",
+    "fields": {
+      "data-layout": {
+        "label": "data-layout",
+        "type": "string"
+      },
+      "image": {
+        "type": "section:teaser-image",
+        "label": "image",
+        "attributes": {
+          "data-media-type": "media:image",
+          "data-media-uuid": "",
+          "itemprop": "image",
+          "itemtype": "teaser-image",
+          "class": "teaser__image"
+        }
+      },
+      "headline": {
+        "label": "headline",
+        "type": "string",
+        "attributes": {
+          "ck-input": "plain",
+          "itemprop": "headline",
+          "class": "teaser__headline"
+        }
+      },
+      "text": {
+        "label": "text",
+        "type": "string",
+        "attributes": {
+          "ck-input": "full",
+          "itemprop": "text",
+          "class": "teaser__text"
+        }
+      },
+      "link": {
+        "label": "link",
+        "type": "section:button",
+        "attributes": {
+          "itemtype": "button",
+          "itemprop": "link",
+          "class": "teaser__link",
+          "link-target": ""
+        }
+      }
+    },
+    "attributes": {
+      "class": "teaser",
+      "itemtype": "teaser"
+    }
+  },
+  "teaser-image": {
+    "type": "teaser-image",
+    "fields": {
+      "data-media-type": {
+        "label": "data-media-type",
+        "type": "string",
+        "default": "media:image"
+      },
+      "data-media-uuid": {
+        "label": "data-media-uuid",
+        "type": "string"
+      },
+      "entity": {
+        "label": "Media Entity",
+        "type": "entity:media"
+      }
+    },
+    "attributes": {
+      "itemprop": "image",
+      "itemtype": "teaser-image",
+      "class": "teaser__image"
+    }
+  },
+  "button": {
+    "type": "button",
+    "fields": {
+      "link-target": {
+        "label": "link-target",
+        "type": "string"
+      },
+      "text": {
+        "label": "text",
+        "type": "string",
+        "attributes": {
+          "itemprop": "text",
+          "ck-input": "plain"
+        }
+      }
+    },
+    "attributes": {
+      "itemtype": "button",
+      "itemprop": "link",
+      "class": "teaser__link"
+    }
+  }
+}

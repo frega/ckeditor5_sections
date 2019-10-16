@@ -1,0 +1,53 @@
+<?php
+
+/**
+ * Implements hook_theme().
+ */
+function ckeditor5_sections_components_theme($existing, $type, $theme, $path) {
+  return [
+    'section' => [
+      'variables' => [
+        'section' => NULL,
+        'document_section' => NULL
+      ],
+    ]
+  ];
+}
+
+/**
+ * Implements hook_theme_suggestions_HOOK().
+ */
+function ckeditor5_sections_components_theme_suggestions_section(array $variables) {
+  $suggestions = [];
+  $section = $variables['section'];
+  if (strpos($section, 'section:') !== FALSE) {
+    $section = substr($section, 8);
+  }
+  $sanitized_section = strtr($section, '.', '_');
+  $suggestions[] = 'section__' . $sanitized_section;
+
+  return $suggestions;
+}
+
+/**
+ * @param $variables
+ */
+function template_preprocess_section(&$variables) {
+  $variables['sections'] = $variables['properties'] = [];
+
+  /** @var \Drupal\ckeditor5_sections\DocumentSection $document_section */
+  $document_section = $variables['document_section'];
+
+  foreach ($document_section->getFields() as $key => $field) {
+    if ($key === 'sections' || $field instanceof \Drupal\ckeditor5_sections\DocumentSection) {
+      $variables['sections'][$key] = $field;
+    }
+    else {
+      // @todo: this needs to be guarded a little more :/ as there's some kind of
+      // entity "injection" happening via ckeditor5_sections_attach_entities().
+      if (!is_object($field) || !method_exists($field, '__toString')) {
+        $variables['properties'][$key] = $field;
+      }
+    }
+  }
+}
