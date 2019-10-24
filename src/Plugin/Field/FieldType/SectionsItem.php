@@ -125,4 +125,12 @@ class SectionsItem extends FieldItemBase {
     ];
   }
 
+  public function setValue($values, $notify = TRUE) {
+    if (isset($this->properties['json'])) {
+      unset($this->properties['json']);
+    }
+    parent::setValue($values, $notify);
+  }
+
+
 }

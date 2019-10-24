@@ -12,4 +12,11 @@ class SectionsItemList extends FieldItemList {
     return NULL;
   }
 
+  public function getConstraints() {
+    $constraints = parent::getConstraints();
+    $constraints[] = $this->typedDataManager->getValidationConstraintManager()->create('SectionConflict', []);
+    return $constraints;
+  }
+
+
 }

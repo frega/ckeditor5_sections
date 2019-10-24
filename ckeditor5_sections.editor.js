@@ -17,6 +17,10 @@
           $(element).val(editor.getData());
           $(element).attr('data-editor-value-is-changed', 'true');
         });
+        // Attach CKEditorInspector if available.
+        if (typeof CKEditorInspector !== 'undefined') {
+          CKEditorInspector.attach( editor );
+        }
       }).catch(error => {
         console.error(error.stack);
       });
@@ -76,6 +80,26 @@
       if (values.attributes.fragment && values.attributes.fragment !== '_none') {
         values.attributes.href += '#' + values.attributes.fragment;
       }
+      // In case the user just opened the linkit dialog and then just hit the
+      // save button without updating the link href, then the data attributes
+      // (entity type, uuid and subtitution) are left empty. In this case, they
+      // will be removed from the original link (see the Linkit ckeditor5
+      // plugin). To prevent this, we flag them so that they can be ignored
+      // instead of being removed. If the original value and the current value
+      // of the href field are equal, then we may need to ignore the data
+      // attributes.
+      var originalHref = $('form.editor-link-dialog input[name="attributes[href]"]').prop('defaultValue');
+      if (originalHref && values.attributes.href == originalHref) {
+        if (!values.attributes['data-entity-type']) {
+          values.attributes['data-entity-type'] = '_ignore';
+        }
+        if (!values.attributes['data-entity-uuid']) {
+          values.attributes['data-entity-uuid'] = '_ignore';
+        }
+        if (!values.attributes['data-entity-substitution']) {
+          values.attributes['data-entity-substitution'] = '_ignore';
+        }
+      }
       currentCallback(values.attributes);
     });
 
@@ -83,7 +107,8 @@
       var sections = Object.keys(editorSettings.templates).map(id => ({
         id: id,
         label: editorSettings.templates[id].label,
-        icon: editorSettings.templates[id].icon
+        icon: editorSettings.templates[id].icon,
+        svgIcon: editorSettings.templates[id].svgIcon,
       }));
       event.respond(sections)
     });
@@ -119,7 +144,7 @@
         }
 
         Drupal.ajax({
-          url: Drupal.url(path + '&field_id=' + $(element).attr('id') + typeFilter + '&return_type=uuid&media_library_selected_type=' + selectedType + '&media_library_remaining=1'),
+          url: Drupal.url(path + '&field_id=' + $(element).attr('id') + typeFilter + '&media_library_selected_type=' + selectedType + '&media_library_remaining=1'),
           dialogType: 'modal',
           dialog: {
             dialogClass: 'media-library-widget-modal',
@@ -143,7 +168,7 @@
         }
 
         Drupal.ajax({
-          url: Drupal.url('admin/content/content-widget?field_id=' + $(element).attr('id') + '&content_library_widget_id=' + $(element).attr('id') + typeFilter + '&return_type=uuid&media_library_selected_type=' + selectedType + '&media_library_remaining=1' ),
+          url: Drupal.url('admin/content/content-widget?field_id=' + $(element).attr('id') + '&content_library_widget_id=' + $(element).attr('id') + typeFilter + '&media_library_selected_type=' + selectedType + '&media_library_remaining=1' ),
           dialogType: 'modal',
           dialog: {
             dialogClass: 'media-library-widget-modal',
@@ -191,9 +216,6 @@
       };
 
       var editorObject = event.detail;
-      if (editorObject['link-target']) {
-        editorObject['link-target'] = editorObject['link-target'].split('#')[0];
-      }
 
       editorObject['href'] = editorObject['link-target'];
 
@@ -224,7 +246,7 @@
     }
 
     return window.ckeditor5_sections_builds[editorSettings.editorBuild].create(editor, Object.assign({
-      masterTemplate: drupalSettings.ckeditor5_sections.masterTemplates[element.name],
+      masterTemplate: element.getAttribute('data-sections-template'),
       templates: editorSettings.templates,
       templateAttributes: editorSettings.templateAttributes,
       templateSession: editorSettings.templateSession,

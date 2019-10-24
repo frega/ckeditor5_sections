@@ -35,6 +35,7 @@ class DocumentSectionTypedDataBasicValidationTest extends KernelTestBase {
     'node',
     'user',
     'file',
+    'linkit',
     'image',
   ];
 
