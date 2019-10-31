@@ -32,10 +32,6 @@ services:
   media_library.opener.sections:
     class: Drupal\ckeditor5_sections\SectionsMediaLibraryOpener
     arguments: ['@entity_type.manager']
-  conflict_resolution.merge_sections_documents:
-    class: Drupal\ckeditor5_sections\ConflictResolution\MergeSectionsDocuments
-    tags:
-      - { name: event_subscriber }
 
 parameters:
   ckeditor5_sections.template_directory: false
